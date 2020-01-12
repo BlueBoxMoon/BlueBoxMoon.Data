@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFramework", "BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj", "{380450DC-0F58-4D10-8D36-21485575FE7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFramework.Sqlite", "BlueBoxMoon.Data.EntityFramework.Sqlite\BlueBoxMoon.Data.EntityFramework.Sqlite.csproj", "{96DF1298-3371-44F5-813D-627DFF4A6D4F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{380450DC-0F58-4D10-8D36-21485575FE7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{380450DC-0F58-4D10-8D36-21485575FE7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{380450DC-0F58-4D10-8D36-21485575FE7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{380450DC-0F58-4D10-8D36-21485575FE7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
