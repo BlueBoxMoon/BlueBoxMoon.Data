@@ -21,42 +21,23 @@
 // SOFTWARE.
 //
 using System;
-using System.Collections.Generic;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
     /// <summary>
-    /// Defines the configuration options that will be used by
-    /// <see cref="EntityDbContext"/> instances.
+    /// Defines the settings for a registered entity.
     /// </summary>
-    public class EntityDbContextOptions
+    public class EntitySettings
     {
         #region Properties
 
         /// <summary>
-        /// The pre- and post-save hooks that will be used. The order these
-        /// hooks are called is not guaranteed.
-        /// </summary>
-        public IReadOnlyList<EntityDbContextSaveHooks> SaveHooks { get; } = new List<EntityDbContextSaveHooks>();
-
-        /// <summary>
-        /// Gets the registered entities.
+        /// Gets or sets the type of the data set.
         /// </summary>
         /// <value>
-        /// The registered entities.
+        /// The type of the data set.
         /// </value>
-        public IReadOnlyDictionary<Type, EntitySettings> RegisteredEntities { get; } = new Dictionary<Type, EntitySettings>();
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDbContextOptions"/> class.
-        /// </summary>
-        internal EntityDbContextOptions()
-        {
-        }
+        public Type DataSetType { get; set; }
 
         #endregion
     }

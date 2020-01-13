@@ -76,6 +76,24 @@ namespace BlueBoxMoon.Data.EntityFramework
         #region Methods
 
         /// <summary>
+        /// Registers the entity to be used in the system.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TSet">The type of the data set.</typeparam>
+        /// <returns>An <see cref="EntityDbContextOptionsBuilder"/> that can be used to further configure options.</returns>
+        public EntityDbContextOptionsBuilder RegisterEntity<TEntity, TSet>()
+        {
+            var entityOptions = new EntitySettings
+            {
+                DataSetType = typeof( TSet )
+            };
+
+            ( ( Dictionary<Type, EntitySettings> ) Options.RegisteredEntities ).Add( typeof( TEntity ), entityOptions );
+
+            return this;
+        }
+
+        /// <summary>
         /// Sets the database provider features type that will provide
         /// database-specific functionality.
         /// </summary>

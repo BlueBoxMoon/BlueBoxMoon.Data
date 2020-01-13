@@ -23,7 +23,11 @@ namespace Console.Runner
                 .AddDbContext<DatabaseContext>( options =>
                 {
                     options.UseSqlite( "Data Source=database.db" );
-                    options.UseEntityDbContext( o => o.UseSqlite() );
+                    options.UseEntityDbContext( o =>
+                    {
+                        o.UseSqlite();
+                        o.RegisterEntity<Person, PersonDataSet>();
+                    } );
                 } )
                 .BuildServiceProvider();
 
@@ -33,10 +37,11 @@ namespace Console.Runner
             var plugin = new EntityPlugin( "com.blueboxmoon.test", new List<Type> { typeof( TestMigration ) } );
             ctx.Database.MigratePlugin( plugin );
 
-            ctx.People.Add( new Person { FirstName = "Daniel", LastName = Guid.NewGuid().ToString() } );
+            var peopleSet = ctx.GetDataSet<Person>();
+            peopleSet.Add( new Person { FirstName = "Daniel", LastName = Guid.NewGuid().ToString() } );
             ctx.SaveChanges();
 
-            var list = ctx.People.AsQueryable().ToList();
+            var list = peopleSet.ToList();
         }
     }
 

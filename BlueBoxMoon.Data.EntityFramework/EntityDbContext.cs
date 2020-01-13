@@ -31,6 +31,8 @@ using BlueBoxMoon.Data.EntityFramework.Internals;
 using FluentValidation;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
@@ -68,6 +70,12 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// their post-save hooks called.
         /// </summary>
         private List<IEntityChanges> _pendingPostSaveEntityHooks;
+
+        /// <summary>
+        /// Contains the <see cref="DataSet{T}"/> objects already instantiated
+        /// with this context.
+        /// </summary>
+        private readonly Dictionary<Type, object> _dataSets = new Dictionary<Type, object>();
 
         #endregion
 
@@ -173,6 +181,26 @@ namespace BlueBoxMoon.Data.EntityFramework
             PostSaveChanges( true );
 
             return changes;
+        }
+
+        /// <summary>
+        /// Gets the data set for <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>A <see cref="DataSet{TEntity}"/> that can be used to interact with the database.</returns>
+        public virtual DataSet<TEntity> GetDataSet<TEntity>()
+            where TEntity : Entity, new()
+        {
+            var entityType = typeof( TEntity );
+
+            if ( !_dataSets.ContainsKey( entityType ) )
+            {
+                var setType = EntityContextOptions.RegisteredEntities[entityType].DataSetType;
+
+                _dataSets.Add( entityType, ActivatorUtilities.CreateInstance( this.GetInfrastructure(), setType, this ) );
+            }
+
+            return ( DataSet<TEntity> ) _dataSets[entityType];
         }
 
         /// <summary>

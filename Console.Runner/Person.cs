@@ -8,4 +8,12 @@ namespace Console.Runner
 
         public string LastName { get; set; }
     }
+
+    public class PersonDataSet : DataSet<Person>
+    {
+        public PersonDataSet( EntityDbContext context )
+            : base( context )
+        {
+        }
+    }
 }
