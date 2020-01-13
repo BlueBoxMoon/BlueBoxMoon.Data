@@ -1,9 +1,12 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFramework", "BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj", "{380450DC-0F58-4D10-8D36-21485575FE7F}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueBoxMoon.Data.EntityFramework", "BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj", "{380450DC-0F58-4D10-8D36-21485575FE7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFramework.Sqlite", "BlueBoxMoon.Data.EntityFramework.Sqlite\BlueBoxMoon.Data.EntityFramework.Sqlite.csproj", "{96DF1298-3371-44F5-813D-627DFF4A6D4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueBoxMoon.Data.EntityFramework.Sqlite", "BlueBoxMoon.Data.EntityFramework.Sqlite\BlueBoxMoon.Data.EntityFramework.Sqlite.csproj", "{96DF1298-3371-44F5-813D-627DFF4A6D4F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console.Runner", "Console.Runner\Console.Runner.csproj", "{CDE42EDF-D6D2-48AF-B894-0767F3AB0950}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,5 +22,15 @@ Global
 		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96DF1298-3371-44F5-813D-627DFF4A6D4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDE42EDF-D6D2-48AF-B894-0767F3AB0950}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDE42EDF-D6D2-48AF-B894-0767F3AB0950}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDE42EDF-D6D2-48AF-B894-0767F3AB0950}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDE42EDF-D6D2-48AF-B894-0767F3AB0950}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2498358B-416D-4A08-ADEF-BBB74510BB17}
 	EndGlobalSection
 EndGlobal
