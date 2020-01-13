@@ -22,7 +22,7 @@
 //
 using System;
 using System.Collections.Generic;
-
+using BlueBoxMoon.Data.EntityFramework.Migrations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,9 +30,9 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
 {
     /// <summary>
     /// Defines the context options extension that will be used by the
-    /// <see cref="ModelDbContext"/> class.
+    /// <see cref="EntityDbContext"/> class.
     /// </summary>
-    internal class ModelDbContextOptionsExtension : IDbContextOptionsExtension
+    internal class EntityDbContextOptionsExtension : IDbContextOptionsExtension
     {
         #region Properties
 
@@ -56,7 +56,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// <summary>
         /// The builder that will generate the options.
         /// </summary>
-        public ModelDbContextOptionsBuilder Builder { get; } = new ModelDbContextOptionsBuilder();
+        public EntityDbContextOptionsBuilder Builder { get; } = new EntityDbContextOptionsBuilder();
 
         #endregion
 
@@ -73,8 +73,16 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         {
             services.AddSingleton( serviceProvider =>
             {
-                return ( IModelDatabaseFeatures ) ActivatorUtilities.CreateInstance( serviceProvider, Builder.ModelDatabaseFeaturesType );
+                return ( IEntityDatabaseFeatures ) ActivatorUtilities.CreateInstance( serviceProvider, Builder.EntityDatabaseFeaturesType );
             } );
+
+            services.AddScoped<IPluginMigrator, PluginMigrator>()
+                .AddScoped<PluginHistoryRepositoryDependencies>();
+
+            foreach ( var action in Builder.ApplyServiceActions )
+            {
+                action( services );
+            }
         }
 
         /// <summary>
@@ -85,7 +93,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// <param name="options"> The options being validated. </param>
         public void Validate( IDbContextOptions options )
         {
-            if ( Builder.ModelDatabaseFeaturesType == null )
+            if ( Builder.EntityDatabaseFeaturesType == null )
             {
                 throw new Exception( "Database provider has not been fully configured." );
             }
@@ -96,7 +104,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         #region Support Classes
 
         /// <summary>
-        /// Defines the extension information for <see cref="ModelDbContextOptionsExtension"/> class.
+        /// Defines the extension information for <see cref="EntityDbContextOptionsExtension"/> class.
         /// </summary>
         private sealed class ExtensionInfo : DbContextOptionsExtensionInfo
         {
@@ -105,8 +113,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
             {
             }
 
-            public new ModelDbContextOptionsExtension Extension
-                => ( ModelDbContextOptionsExtension ) base.Extension;
+            public new EntityDbContextOptionsExtension Extension
+                => ( EntityDbContextOptionsExtension ) base.Extension;
 
             public override bool IsDatabaseProvider => false;
 

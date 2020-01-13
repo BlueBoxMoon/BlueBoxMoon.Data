@@ -33,36 +33,36 @@ namespace BlueBoxMoon.Data.EntityFramework
     public static class DbContextOptionsBuilderExtensions
     {
         /// <summary>
-        /// Configures the database context to use ModelDbContext options.
+        /// Configures the database context to use <see cref="EntityDbContext"/> options.
         /// </summary>
         /// <param name="optionsBuilder">The builder being used to configure the context.</param>
-        /// <param name="modelOptionsAction">An optional action to allow additional configuration.</param>
+        /// <param name="entityOptionsAction">An optional action to allow additional configuration.</param>
         /// <returns> The options builder so that further configuration can be chained. </returns>
-        public static DbContextOptionsBuilder UseModelDbContext(
+        public static DbContextOptionsBuilder UseEntityDbContext(
             this DbContextOptionsBuilder optionsBuilder,
-            Action<ModelDbContextOptionsBuilder> modelOptionsAction = null )
+            Action<EntityDbContextOptionsBuilder> entityOptionsAction = null )
         {
-            var extension = optionsBuilder.Options.FindExtension<ModelDbContextOptionsExtension>()
-                ?? new ModelDbContextOptionsExtension();
+            var extension = optionsBuilder.Options.FindExtension<EntityDbContextOptionsExtension>()
+                ?? new EntityDbContextOptionsExtension();
 
             ( ( IDbContextOptionsBuilderInfrastructure ) optionsBuilder ).AddOrUpdateExtension( extension );
 
-            optionsBuilder.ReplaceService<IMigrationsAssembly, ModelMigrationsAssembly>();
-            modelOptionsAction?.Invoke( extension.Builder );
+            optionsBuilder.ReplaceService<IMigrationsAssembly, EntityMigrationsAssembly>();
+            entityOptionsAction?.Invoke( extension.Builder );
 
             return optionsBuilder;
         }
 
         /// <summary>
-        /// Configures the database context to use ModelDbContext options.
+        /// Configures the database context to use <see cref="EntityDbContext"/> options.
         /// </summary>
         /// <param name="optionsBuilder">The builder being used to configure the context.</param>
-        /// <param name="modelOptionsAction">An optional action to allow additional configuration.</param>
+        /// <param name="entityOptionsAction">An optional action to allow additional configuration.</param>
         /// <returns> The options builder so that further configuration can be chained. </returns>
-        public static DbContextOptionsBuilder<TContext> UseModelDbContext<TContext>(
+        public static DbContextOptionsBuilder<TContext> UseEntityDbContext<TContext>(
             this DbContextOptionsBuilder<TContext> optionsBuilder,
-            Action<ModelDbContextOptionsBuilder> modelOptionsAction = null )
-            where TContext : ModelDbContext
-            => ( DbContextOptionsBuilder<TContext> ) UseModelDbContext( ( DbContextOptionsBuilder ) optionsBuilder, modelOptionsAction );
+            Action<EntityDbContextOptionsBuilder> entityOptionsAction = null )
+            where TContext : EntityDbContext
+            => ( DbContextOptionsBuilder<TContext> ) UseEntityDbContext( ( DbContextOptionsBuilder ) optionsBuilder, entityOptionsAction );
     }
 }

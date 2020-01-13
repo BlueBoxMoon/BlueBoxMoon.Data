@@ -20,23 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
-    /// <summary>
-    /// Defines the basic requirements of a model in the database.
-    /// </summary>
-    public interface IModel
+    public interface IEntityDatabaseFeatures
     {
         /// <summary>
-        /// The unique identifier of the model.
+        /// Configures a new column for automatic incrementation.
         /// </summary>
-        int Id { get; set; }
-
-        /// <summary>
-        /// The globally unique identifier of the model.
-        /// </summary>
-        Guid Guid { get; set; }
+        /// <param name="operation">The operation.</param>
+        void AutoIncrementColumn( OperationBuilder<AddColumnOperation> operation );
     }
 }

@@ -22,6 +22,8 @@
 //
 using System;
 
+using BlueBoxMoon.Data.EntityFramework.Migrations;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
@@ -41,9 +43,9 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <returns></returns>
         public static OperationBuilder<AddColumnOperation> AutoIncrement( this OperationBuilder<AddColumnOperation> operationBuilder, MigrationBuilder migrationBuilder )
         {
-            if ( migrationBuilder is ModelMigrationBuilder modelMigrationBuilder )
+            if ( migrationBuilder is EntityMigrationBuilder entityMigrationBuilder )
             {
-                modelMigrationBuilder.DatabaseFeatures.AutoIncrementColumn( operationBuilder );
+                entityMigrationBuilder.DatabaseFeatures.AutoIncrementColumn( operationBuilder );
             }
             else
             {

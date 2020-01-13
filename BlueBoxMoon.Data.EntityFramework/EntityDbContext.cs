@@ -34,7 +34,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
-    public class ModelDbContext : DbContext
+    /// <summary>
+    /// Provides all the automation and resources required for a DbContext
+    /// to work with this library.
+    /// </summary>
+    /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
+    public class EntityDbContext : DbContext
     {
         #region Properties
 
@@ -46,7 +51,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// Defines the options used by this database context.
         /// </summary>
-        protected ModelDbContextOptions ModelOptions { get; }
+        protected EntityDbContextOptions EntityContextOptions { get; }
 
         #endregion
 
@@ -56,34 +61,34 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// Identifies any save hooks that successfully ran during pre-save
         /// that should be run during post-save.
         /// </summary>
-        private List<IModelSaveHook> _pendingPostSaveContextHooks;
+        private List<IEntitySaveHook> _pendingPostSaveContextHooks;
 
         /// <summary>
-        /// Identifies any <see cref="IModelChanges"/> instances that need
+        /// Identifies any <see cref="IEntityChanges"/> instances that need
         /// their post-save hooks called.
         /// </summary>
-        private List<IModelChanges> _pendingPostSaveModelHooks;
+        private List<IEntityChanges> _pendingPostSaveEntityHooks;
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ModelDbContext"/> class.
+        /// Initializes a new instance of the <see cref="EntityDbContext"/> class.
         /// </summary>
         /// <param name="options">The context options used to initialize this database context.</param>
-        public ModelDbContext( DbContextOptions options )
+        public EntityDbContext( DbContextOptions options )
             : base( options )
         {
-            var extension = options.FindExtension<ModelDbContextOptionsExtension>();
+            var extension = options.FindExtension<EntityDbContextOptionsExtension>();
 
             if ( extension != null )
             {
-                ModelOptions = extension.Builder.Options;
+                EntityContextOptions = extension.Builder.Options;
             }
             else
             {
-                ModelOptions = new ModelDbContextOptions();
+                EntityContextOptions = new EntityDbContextOptions();
             }
         }
 
@@ -98,7 +103,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <returns>The number of records that were modified.</returns>
         public sealed override int SaveChanges( bool acceptAllChangesOnSuccess )
         {
-            ValidateModels();
+            ValidateEntities();
 
             if ( DisablePrePostProcessing )
             {
@@ -138,7 +143,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <returns>The number of records that were modified.</returns>
         public sealed override async Task<int> SaveChangesAsync( bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default )
         {
-            ValidateModels();
+            ValidateEntities();
 
             if ( DisablePrePostProcessing )
             {
@@ -171,30 +176,30 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
-        /// Validates all modified <see cref="IModel"/> instances to ensure
+        /// Validates all modified <see cref="IEntityValidation"/> instances to ensure
         /// they are valid before attempting to save to the database.
         /// </summary>
-        protected virtual void ValidateModels()
+        protected virtual void ValidateEntities()
         {
             var exceptions = new List<Exception>();
 
-            var models = ChangeTracker.Entries()
+            var entities = ChangeTracker.Entries()
                 .Where( a => a.State == EntityState.Added || a.State == EntityState.Modified )
-                .Where( a => a.Entity is IModelValidation )
+                .Where( a => a.Entity is IEntityValidation )
                 .Select( a => a.Entity )
-                .Cast<IModelValidation>()
+                .Cast<IEntityValidation>()
                 .ToList();
 
-            foreach ( var model in models )
+            foreach ( var entity in entities )
             {
-                var validator = model.GetValidator();
+                var validator = entity.GetValidator();
 
                 if ( validator == null )
                 {
                     continue;
                 }
 
-                var result = validator.Validate( model );
+                var result = validator.Validate( entity );
 
                 if ( !result.IsValid )
                 {
@@ -204,7 +209,7 @@ namespace BlueBoxMoon.Data.EntityFramework
 
             if ( exceptions.Any() )
             {
-                throw new AggregateException( "One or more models failed validation.", exceptions );
+                throw new AggregateException( "One or more entities failed validation.", exceptions );
             }
         }
 
@@ -217,45 +222,45 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </remarks>
         protected virtual void PreSaveChanges()
         {
-            _pendingPostSaveContextHooks = new List<IModelSaveHook>();
-            _pendingPostSaveModelHooks = new List<IModelChanges>();
+            _pendingPostSaveContextHooks = new List<IEntitySaveHook>();
+            _pendingPostSaveEntityHooks = new List<IEntityChanges>();
 
-            CallPreSaveModelHooks();
+            CallPreSaveEntityHooks();
 
             CallPreSaveContextHooks();
         }
 
         /// <summary>
-        /// Initiates any calls to any <see cref="IModelChanges"/> instances
+        /// Initiates any calls to any <see cref="IEntityChanges"/> instances
         /// to give them a chance to do final preparation for saving.
         /// </summary>
-        private void CallPreSaveModelHooks()
+        private void CallPreSaveEntityHooks()
         {
             var entries = ChangeTracker.Entries()
                 .Where( a => a.State == EntityState.Added || a.State == EntityState.Modified )
-                .Where( a => a.Entity is IModelChanges )
+                .Where( a => a.Entity is IEntityChanges )
                 .ToList();
 
             if ( entries.Count > 0 )
             {
                 foreach ( var entry in entries )
                 {
-                    var model = ( IModelChanges ) entry.Entity;
+                    var entity = ( IEntityChanges ) entry.Entity;
 
                     try
                     {
-                        model.PreSaveChanges( this, entry );
+                        entity.PreSaveChanges( this, entry );
                     }
                     catch ( Exception ex )
                     {
                         CallPendingPostSaveContextHooks( false );
 
-                        CallPendingPostSaveModelHooks( false );
+                        CallPendingPostSaveEntityHooks( false );
 
                         throw ex;
                     }
 
-                    _pendingPostSaveModelHooks.Add( model );
+                    _pendingPostSaveEntityHooks.Add( entity );
                 }
             }
         }
@@ -265,18 +270,18 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </summary>
         private void CallPreSaveContextHooks()
         {
-            _pendingPostSaveContextHooks = new List<IModelSaveHook>();
+            _pendingPostSaveContextHooks = new List<IEntitySaveHook>();
 
             //
             // Call pre-save hooks.
             //
-            foreach ( var saveHook in ModelOptions.SaveHooks )
+            foreach ( var saveHook in EntityContextOptions.SaveHooks )
             {
                 try
                 {
                     if ( saveHook.HookType != null )
                     {
-                        var hook = ( IModelSaveHook ) Activator.CreateInstance( saveHook.HookType );
+                        var hook = ( IEntitySaveHook ) Activator.CreateInstance( saveHook.HookType );
 
                         hook.PreSaveChanges( this );
 
@@ -291,7 +296,7 @@ namespace BlueBoxMoon.Data.EntityFramework
                 {
                     CallPendingPostSaveContextHooks( false );
 
-                    CallPendingPostSaveModelHooks( false);
+                    CallPendingPostSaveEntityHooks( false);
 
                     throw ex;
                 }
@@ -313,11 +318,11 @@ namespace BlueBoxMoon.Data.EntityFramework
             //
             // Call post-save hooks.
             //
-            for ( int i = 0; i < ModelOptions.SaveHooks.Count; i++ )
+            for ( int i = 0; i < EntityContextOptions.SaveHooks.Count; i++ )
             {
                 try
                 {
-                    ModelOptions.SaveHooks[i].PostSave?.Invoke( this, success );
+                    EntityContextOptions.SaveHooks[i].PostSave?.Invoke( this, success );
                 }
                 catch ( Exception ex )
                 {
@@ -329,7 +334,7 @@ namespace BlueBoxMoon.Data.EntityFramework
             // Call any pending post-save hooks.
             //
             exceptions.AddRange( CallPendingPostSaveContextHooks( success ) );
-            exceptions.AddRange( CallPendingPostSaveModelHooks( success ) );
+            exceptions.AddRange( CallPendingPostSaveEntityHooks( success ) );
 
             if ( exceptions.Count > 0 )
             {
@@ -374,14 +379,14 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
-        /// Calls any model hooks that are pending and need to be called.
+        /// Calls any <see cref="Entity"/> hooks that are pending and need to be called.
         /// </summary>
         /// <param name="success"><c>true</c> if the save was successful.</param>
-        private List<Exception> CallPendingPostSaveModelHooks( bool success )
+        private List<Exception> CallPendingPostSaveEntityHooks( bool success )
         {
             var exceptions = new List<Exception>();
 
-            if ( _pendingPostSaveModelHooks == null )
+            if ( _pendingPostSaveEntityHooks == null )
             {
                 return exceptions;
             }
@@ -390,7 +395,7 @@ namespace BlueBoxMoon.Data.EntityFramework
             // Call any previous hooks that need to be told the save
             // failed.
             //
-            foreach ( var pendingHook in _pendingPostSaveModelHooks )
+            foreach ( var pendingHook in _pendingPostSaveEntityHooks )
             {
                 try
                 {
@@ -402,7 +407,7 @@ namespace BlueBoxMoon.Data.EntityFramework
                 }
             }
 
-            _pendingPostSaveModelHooks = null;
+            _pendingPostSaveEntityHooks = null;
 
             return exceptions;
         }

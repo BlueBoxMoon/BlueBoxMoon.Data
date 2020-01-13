@@ -20,29 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Collections.Generic;
+
+using BlueBoxMoon.Data.EntityFramework.Internals;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
     /// <summary>
-    /// Defines methods that will be called before and after a model is saved.
+    /// Defines the configuration options that will be used by
+    /// <see cref="EntityDbContext"/> instances.
     /// </summary>
-    public interface IModelChanges
+    public class EntityDbContextOptions
     {
-        /// <summary>
-        /// Called before this model is saved to the database.
-        /// </summary>
-        /// <param name="dbContext">The database context owning this instance.</param>
-        /// <param name="entry">The Entity Framework entry about this instance.</param>
-        void PreSaveChanges( ModelDbContext dbContext, EntityEntry entry );
+        #region Properties
 
         /// <summary>
-        /// Called after this model has been saved to the database. If the
-        /// PreSaveChanges() was called, then it is guaranteed that this method
-        /// will also be called.
+        /// The pre- and post-save hooks that will be used. The order these
+        /// hooks are called is not guaranteed.
         /// </summary>
-        /// <param name="dbContext">The database context owning this instance.</param>
-        /// <param name="success"><c>true</c> if the save was successful.</param>
-        void PostSaveChanges( ModelDbContext dbContext, bool success );
+        public IReadOnlyList<EntityDbContextSaveHooks> SaveHooks { get; } = new List<EntityDbContextSaveHooks>();
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDbContextOptions"/> class.
+        /// </summary>
+        internal EntityDbContextOptions()
+        {
+        }
+
+        #endregion
     }
 }

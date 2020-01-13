@@ -20,16 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
+using System;
 
-namespace BlueBoxMoon.Data.EntityFramework.Sqlite
+namespace BlueBoxMoon.Data.EntityFramework
 {
-    internal class SqliteModelDatabaseFeatures : IModelDatabaseFeatures
+    /// <summary>
+    /// Defines the basic requirements of an entity in the database.
+    /// </summary>
+    public interface IEntity
     {
-        public void AutoIncrementColumn( OperationBuilder<AddColumnOperation> operation )
-        {
-            operation.Annotation( "Sqlite:Autoincrement", true );
-        }
+        /// <summary>
+        /// The unique identifier of the entity.
+        /// </summary>
+        int Id { get; set; }
+
+        /// <summary>
+        /// The globally unique identifier of the entity.
+        /// </summary>
+        Guid Guid { get; set; }
     }
 }

@@ -20,27 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using FluentValidation;
+using System;
+
+using BlueBoxMoon.Data.EntityFramework.Migrations;
+
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
     /// <summary>
-    /// Defines the basic requirements of a model that supports pre-save
-    /// validation.
+    /// Provides additional functionality to the <see cref="DatabaseFacade"/> class.
     /// </summary>
-    public interface IModelValidation
+    public static class EntityDatabaseFacadeExtensions
     {
         /// <summary>
-        /// Gets the validator that will validate this instance.
+        /// Migrates a plugin to the latest version possible.
         /// </summary>
-        /// <returns>
-        /// An <see cref="IValidator"/> instance or null if no validation
-        /// needs to be performed.
-        /// </returns>
-        /// <remarks>
-        /// Validators can and should be singleton instances for
-        /// performance reasons.
-        /// </remarks>
-        IValidator GetValidator();
+        /// <param name="databaseFacade">The database facade.</param>
+        /// <param name="plugin">The plugin to be migrated.</param>
+        public static void MigratePlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        {
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( plugin );
+        }
     }
 }

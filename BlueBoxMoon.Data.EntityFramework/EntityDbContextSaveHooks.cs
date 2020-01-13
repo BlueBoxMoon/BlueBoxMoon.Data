@@ -27,22 +27,22 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// <summary>
     /// Used internally to track pre- and post-save hooks.
     /// </summary>
-    public class ModelDbContextSaveHooks
+    public class EntityDbContextSaveHooks
     {
         #region Delegates
 
         /// <summary>
         /// A pre-save hook that will be called before the changes are saved.
         /// </summary>
-        /// <param name="modelDbContext">The database context.</param>
-        public delegate void PreSaveHook( ModelDbContext modelDbContext );
+        /// <param name="entityDbContext">The database context.</param>
+        public delegate void PreSaveHook( EntityDbContext entityDbContext );
 
         /// <summary>
         /// A post-save hook that will be called before the changes are saved.
         /// </summary>
-        /// <param name="modelDbContext">The database context.</param>
+        /// <param name="entityDbContext">The database context.</param>
         /// <param name="success"><c>true</c> if the save was successful.</param>
-        public delegate void PostSaveHook( ModelDbContext modelDbContext, bool success );
+        public delegate void PostSaveHook( EntityDbContext entityDbContext, bool success );
 
         #endregion
 
@@ -60,7 +60,7 @@ namespace BlueBoxMoon.Data.EntityFramework
 
         /// <summary>
         /// A type that will be instantiated to provide the PreSave and
-        /// PostSave methods. Must implement the IModelSaveHook interface.
+        /// PostSave methods. Must implement the <see cref="IEntitySaveHook"/> interface.
         /// </summary>
         public Type HookType { get; }
 
@@ -69,16 +69,16 @@ namespace BlueBoxMoon.Data.EntityFramework
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ModelDbContextSaveHooks"/> class.
+        /// Initializes a new instance of the <see cref="EntityDbContextSaveHooks"/> class.
         /// </summary>
         /// <param name="preSave">The pre-save hook to call.</param>
         /// <param name="postSave">The post-save hook to call.</param>
-        /// <param name="type">The type which implements IModelSaveHook.</param>
-        internal ModelDbContextSaveHooks( PreSaveHook preSave, PostSaveHook postSave, Type type )
+        /// <param name="type">The type which implements <see cref="IEntitySaveHook"/>.</param>
+        internal EntityDbContextSaveHooks( PreSaveHook preSave, PostSaveHook postSave, Type type )
         {
-            if ( type != null && !typeof( IModelSaveHook ).IsAssignableFrom( type ) )
+            if ( type != null && !typeof( IEntitySaveHook ).IsAssignableFrom( type ) )
             {
-                throw new ArgumentException( "Type does not implement IModelSaveHook.", nameof( type ) );
+                throw new ArgumentException( $"Type does not implement {nameof( IEntitySaveHook )}.", nameof( type ) );
             }
 
             if ( ( preSave != null ? 1 : 0 ) + ( postSave != null ? 1 : 0 ) + ( type != null ? 1 : 0 ) > 1 )

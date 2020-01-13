@@ -20,59 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
-
-using FluentValidation;
-
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-
-namespace BlueBoxMoon.Data.EntityFramework
+namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
-    public abstract class Model : IModel, IModelChanges, IModelValidation
+    /// <summary>
+    /// Provides functionality to migrate a plugin from the current
+    /// version to another version.
+    /// </summary>
+    public interface IPluginMigrator
     {
-        private static readonly IValidator _validator = new ModelValidator();
-
-        #region Properties
-
         /// <summary>
-        /// The unique identifier of the model.
+        /// Initiates a migration operation to the target migration version.
         /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// The globally unique identifier of the model.
-        /// </summary>
-        public Guid Guid { get; set; } = Guid.NewGuid();
-
-        #endregion
-
-        #region Methods
-
-        public virtual void PreSaveChanges( ModelDbContext dbContext, EntityEntry entry )
-        {
-        }
-
-        public virtual void PostSaveChanges( ModelDbContext dbContext, bool success )
-        {
-        }
-
-        public virtual IValidator GetValidator()
-        {
-            return _validator;
-        }
-
-        #endregion
-
-        #region Validator
-
-        private class ModelValidator : AbstractValidator<Model>
-        {
-            public ModelValidator()
-            {
-                RuleFor( a => a.Guid ).NotEmpty();
-            }
-        }
-
-        #endregion
+        /// <param name="plugin">The plugin whose migrations should be run.</param>
+        /// <param name="targetMigration">The target migration.</param>
+        void Migrate( EntityPlugin plugin, string targetMigration = null );
     }
 }

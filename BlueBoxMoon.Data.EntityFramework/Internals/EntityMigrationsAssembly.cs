@@ -23,6 +23,8 @@
 using System;
 using System.Reflection;
 
+using BlueBoxMoon.Data.EntityFramework.Migrations;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -33,20 +35,52 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BlueBoxMoon.Data.EntityFramework.Internals
 {
 #pragma warning disable EF1001
-    public class ModelMigrationsAssembly : MigrationsAssembly
+    /// <summary>
+    /// Custom migration assembly resolver to pass in the service provider
+    /// to the migrations.
+    /// </summary>
+    /// <seealso cref="Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationsAssembly" />
+    public class EntityMigrationsAssembly : MigrationsAssembly
     {
-        private readonly ModelDbContext _dbContext;
+        #region Fields
 
-        public ModelMigrationsAssembly(
+        private readonly EntityDbContext _dbContext;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMigrationsAssembly"/> class.
+        /// </summary>
+        /// <param name="currentContext"></param>
+        /// <param name="options"></param>
+        /// <param name="idGenerator"></param>
+        /// <param name="logger"></param>
+        public EntityMigrationsAssembly(
             ICurrentDbContext currentContext,
             IDbContextOptions options,
             IMigrationsIdGenerator idGenerator,
             IDiagnosticsLogger<DbLoggerCategory.Migrations> logger )
             : base( currentContext, options, idGenerator, logger )
         {
-            _dbContext = ( ModelDbContext ) currentContext.Context;
+            _dbContext = ( EntityDbContext ) currentContext.Context;
         }
 
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+        /// the same compatibility standards as public APIs. It may be changed or removed without notice in
+        /// any release. You should only use it directly in your code with extreme caution and knowing that
+        /// doing so can result in application failures when updating to a new Entity Framework Core release.
+        /// </summary>
+        /// <param name="migrationClass"></param>
+        /// <param name="activeProvider"></param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">activeProvider</exception>
         public override Migration CreateMigration( TypeInfo migrationClass, string activeProvider )
         {
             if ( activeProvider == null )
@@ -60,13 +94,15 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
 
             migration.ActiveProvider = activeProvider;
 
-            if ( migration is ModelMigration modelMigration )
+            if ( migration is EntityMigration entityMigration )
             {
-                modelMigration.ServiceProvider = serviceProvider;
+                entityMigration.ServiceProvider = serviceProvider;
             }
 
             return migration;
         }
+
+        #endregion
     }
 #pragma warning restore EF1001
 }

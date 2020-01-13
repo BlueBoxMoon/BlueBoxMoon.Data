@@ -20,6 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System.Runtime.CompilerServices;
+using FluentValidation;
 
-//[assembly:InternalsVisibleTo( "BlueBoxMoon.Data.EntityFramework.Sqlite" )]
+namespace BlueBoxMoon.Data.EntityFramework
+{
+    /// <summary>
+    /// Defines the basic requirements of an entity that supports pre-save
+    /// validation.
+    /// </summary>
+    public interface IEntityValidation
+    {
+        /// <summary>
+        /// Gets the validator that will validate this instance.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="IValidator"/> instance or null if no validation
+        /// needs to be performed.
+        /// </returns>
+        /// <remarks>
+        /// Validators can and should be singleton instances for
+        /// performance reasons.
+        /// </remarks>
+        IValidator GetValidator();
+    }
+}

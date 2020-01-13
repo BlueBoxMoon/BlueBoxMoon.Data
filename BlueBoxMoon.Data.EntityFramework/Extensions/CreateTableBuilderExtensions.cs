@@ -34,7 +34,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     public static class CreateTableBuilderExtensions
     {
         /// <summary>
-        /// Create a table for a subclass of the Model class.
+        /// Create a table for a subclass of the <see cref="Entity"/> class.
         /// </summary>
         /// <typeparam name="TColumns"></typeparam>
         /// <param name="migrationBuilder"></param>
@@ -44,7 +44,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <param name="constraints"></param>
         /// <param name="comment"></param>
         /// <returns></returns>
-        public static CreateTableBuilder<TColumns> CreateModelTable<TColumns>( this MigrationBuilder migrationBuilder,
+        public static CreateTableBuilder<TColumns> CreateEntityTable<TColumns>( this MigrationBuilder migrationBuilder,
             string name,
             Func<ColumnsBuilder, TColumns> columns,
             string schema = null,

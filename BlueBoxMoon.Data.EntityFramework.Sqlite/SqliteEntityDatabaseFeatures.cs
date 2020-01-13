@@ -20,16 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
+
 namespace BlueBoxMoon.Data.EntityFramework.Sqlite
 {
-    public static class ModelDbContextOptionsBuilderExtensions
+    internal class SqliteEntityDatabaseFeatures : IEntityDatabaseFeatures
     {
         /// <summary>
-        /// Configures the model database to use the Sqlite provider.
+        /// Configures a new column for automatic incrementation.
         /// </summary>
-        /// <param name="optionsBuilder"></param>
-        /// <returns></returns>
-        public static ModelDbContextOptionsBuilder UseSqlite( this ModelDbContextOptionsBuilder optionsBuilder )
-            => optionsBuilder.UseDatabaseProviderFeatures<SqliteModelDatabaseFeatures>();
+        /// <param name="operation">The operation.</param>
+        public void AutoIncrementColumn( OperationBuilder<AddColumnOperation> operation )
+        {
+            operation.Annotation( "Sqlite:Autoincrement", true );
+        }
     }
 }

@@ -23,16 +23,39 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace BlueBoxMoon.Data.EntityFramework
+namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
-    public class ModelMigrationBuilder : MigrationBuilder
+    /// <summary>
+    /// A builder providing fluentish API for building entity operations.
+    /// </summary>
+    /// <seealso cref="Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder" />
+    public class EntityMigrationBuilder : MigrationBuilder
     {
-        internal IModelDatabaseFeatures DatabaseFeatures { get; }
+        #region Properties
 
-        public ModelMigrationBuilder( string activeProvider, IModelDatabaseFeatures databaseFeatures )
+        /// <summary>
+        /// Gets the database features.
+        /// </summary>
+        /// <value>
+        /// The database features.
+        /// </value>
+        internal IEntityDatabaseFeatures DatabaseFeatures { get; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityMigrationBuilder"/> class.
+        /// </summary>
+        /// <param name="activeProvider">The active provider.</param>
+        /// <param name="databaseFeatures">The database features.</param>
+        public EntityMigrationBuilder( string activeProvider, IEntityDatabaseFeatures databaseFeatures )
             : base( activeProvider )
         {
             DatabaseFeatures = databaseFeatures;
         }
+
+        #endregion
     }
 }
