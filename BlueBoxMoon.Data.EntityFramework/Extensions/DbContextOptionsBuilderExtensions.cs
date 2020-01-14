@@ -43,7 +43,7 @@ namespace BlueBoxMoon.Data.EntityFramework
             Action<EntityDbContextOptionsBuilder> entityOptionsAction = null )
         {
             var extension = optionsBuilder.Options.FindExtension<EntityDbContextOptionsExtension>()
-                ?? new EntityDbContextOptionsExtension();
+                ?? new EntityDbContextOptionsExtension( optionsBuilder );
 
             ( ( IDbContextOptionsBuilderInfrastructure ) optionsBuilder ).AddOrUpdateExtension( extension );
 

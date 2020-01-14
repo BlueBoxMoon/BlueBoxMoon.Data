@@ -22,7 +22,7 @@
 //
 using System;
 using System.Collections.Generic;
-
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
@@ -52,6 +52,11 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
+        /// The base options builder.
+        /// </summary>
+        public DbContextOptionsBuilder BaseOptionsBuilder { get; }
+
+        /// <summary>
         /// The type that will provide services unique to each database
         /// provider.
         /// </summary>
@@ -70,6 +75,19 @@ namespace BlueBoxMoon.Data.EntityFramework
         #region Fields
 
         private readonly EntityDbContextOptions _options = new EntityDbContextOptions();
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="EntityDbContextOptionsBuilder"/> class.
+        /// </summary>
+        /// <param name="baseOptionsBuilder">The base options builder.</param>
+        public EntityDbContextOptionsBuilder( DbContextOptionsBuilder baseOptionsBuilder )
+        {
+            BaseOptionsBuilder = baseOptionsBuilder;
+        }
 
         #endregion
 
