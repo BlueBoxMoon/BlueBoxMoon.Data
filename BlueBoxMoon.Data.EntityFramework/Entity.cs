@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 using System;
-
+using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -44,7 +44,8 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// The unique identifier of the entity.
         /// </summary>
-        public int Id { get; set; }
+        [Key]
+        public long Id { get; set; }
 
         /// <summary>
         /// The globally unique identifier of the entity.

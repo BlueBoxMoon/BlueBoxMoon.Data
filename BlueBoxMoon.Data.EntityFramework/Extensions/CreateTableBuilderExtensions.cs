@@ -61,7 +61,7 @@ namespace BlueBoxMoon.Data.EntityFramework
             createTableOperation.AppendColumns(
                 table => new
                 {
-                    Id = table.Column<int>( nullable: false ).AutoIncrement( migrationBuilder ),
+                    Id = table.Column<long>( nullable: false ).AutoIncrement( migrationBuilder ),
                     Guid = table.Column<Guid>( nullable: false )
                 }, table =>
                 {

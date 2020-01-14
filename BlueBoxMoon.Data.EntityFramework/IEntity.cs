@@ -32,7 +32,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// The unique identifier of the entity.
         /// </summary>
-        int Id { get; set; }
+        long Id { get; set; }
 
         /// <summary>
         /// The globally unique identifier of the entity.
