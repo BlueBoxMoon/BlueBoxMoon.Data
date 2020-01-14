@@ -18,7 +18,7 @@ namespace Console.Runner
     {
         static void Main( string[] args )
         {
-            var serviceProvider = new ServiceCollection()
+            var serviceCollection = new ServiceCollection()
                 .AddLogging( a => a.AddConsole() )
                 .AddDbContext<DatabaseContext>( options =>
                 {
@@ -29,7 +29,9 @@ namespace Console.Runner
                         o.RegisterEntity<Person, PersonDataSet>();
                     } );
                 } )
-                .BuildServiceProvider();
+                .AddSingleton<IDbContextFactory<DatabaseContext>, DbContextFactory<DatabaseContext>>();
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
 
             var ctx = serviceProvider.GetService<DatabaseContext>();
             ctx.Database.Migrate();
@@ -41,7 +43,11 @@ namespace Console.Runner
             peopleSet.Add( new Person { FirstName = "Daniel", LastName = Guid.NewGuid().ToString() } );
             ctx.SaveChanges();
 
-            var list = peopleSet.ToList();
+            var ctxFactory = serviceProvider.GetService<IDbContextFactory<DatabaseContext>>();
+            using ( var ctx2 = ctxFactory.CreateContext() )
+            {
+                var list = peopleSet.ToList();
+            }
         }
     }
 
