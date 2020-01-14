@@ -22,8 +22,12 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
+using BlueBoxMoon.Data.EntityFramework.Migrations;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BlueBoxMoon.Data.EntityFramework
@@ -32,7 +36,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// Identifies a single plugin to be activated in the system.
     /// </summary>
     /// <seealso cref="BlueBoxMoon.Data.EntityFramework.IEntityPlugin" />
-    public class EntityPlugin
+    public abstract class EntityPlugin
     {
         #region Properties
 
@@ -42,42 +46,37 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <value>
         /// The unique identifier for this plugin.
         /// </value>
-        public string Identifier { get; }
+        public virtual string Identifier => GetType().Assembly.GetName().Name;
 
         /// <summary>
-        /// Gets the migrations that are associated with this plugin.
+        /// Gets the name of the plugin.
         /// </summary>
         /// <value>
-        /// The migrations that are associated with this plugin.
+        /// The name of the plugin.
         /// </value>
-        public IReadOnlyDictionary<string, TypeInfo> Migrations { get; }
-
-        #endregion
-
-        #region Constructors
+        public virtual string Name => GetType().Assembly.GetName().Name;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityPlugin"/> class.
+        /// Get the migration types that need to be run to install or uninstall
+        /// this plugin.
         /// </summary>
-        /// <param name="identifier">The unique identifier of the plugin.</param>
-        /// <param name="migrationTypes">The migration class types.</param>
-        public EntityPlugin( string identifier, IEnumerable<Type> migrationTypes )
+        /// <returns>An enumerable of <see cref="Type"/>.</returns>
+        public virtual IEnumerable<Type> GetMigrations()
         {
-            Identifier = identifier;
+            return GetType()
+                .Assembly
+                .GetExportedTypes()
+                .Where( a => typeof( EntityMigration ).IsAssignableFrom( a ) )
+                .Where( a => a.GetCustomAttribute<MigrationAttribute>() !=  null )
+                .ToList();
+        }
 
-            var migrations = new Dictionary<string, TypeInfo>();
-
-            foreach ( var type in migrationTypes )
-            {
-                var migrationId = type.GetCustomAttribute<MigrationAttribute>()?.Id;
-
-                if ( !string.IsNullOrWhiteSpace( migrationId ) )
-                {
-                    migrations.Add( migrationId, type.GetTypeInfo() );
-                }
-            }
-
-            Migrations = migrations;
+        /// <summary>
+        /// Called when the EntityDbContext needs to create it's model.
+        /// </summary>
+        /// <param name="modelBuilder">The instance that handles building the model.</param>
+        public virtual void OnModelCreating( ModelBuilder modelBuilder )
+        {
         }
 
         #endregion

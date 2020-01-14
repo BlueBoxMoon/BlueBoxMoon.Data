@@ -301,8 +301,9 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         {
             var appliedMigrations = new Dictionary<string, TypeInfo>();
             var unappliedMigrations = new Dictionary<string, TypeInfo>();
+            var migrations = plugin.GetMigrations().ToList();
 
-            if ( plugin.Migrations.Count == 0 )
+            if ( migrations.Count == 0 )
             {
                 Logger.LogInformation( LoggingEvents.MigrationsNotFoundId, LoggingEvents.MigrationsNotFound );
             }
@@ -310,15 +311,17 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             //
             // Determine the set of applied and unapplied migrations.
             //
-            foreach ( var migration in plugin.Migrations )
+            foreach ( var migration in migrations )
             {
-                if ( appliedMigrationEntries.Contains( migration.Key ) )
+                var migrationId = migration.GetCustomAttribute<MigrationAttribute>().Id;
+
+                if ( appliedMigrationEntries.Contains( migrationId ) )
                 {
-                    appliedMigrations.Add( migration.Key, migration.Value );
+                    appliedMigrations.Add( migrationId, migration.GetTypeInfo() );
                 }
                 else
                 {
-                    unappliedMigrations.Add( migration.Key, migration.Value );
+                    unappliedMigrations.Add( migrationId, migration.GetTypeInfo() );
                 }
             }
 

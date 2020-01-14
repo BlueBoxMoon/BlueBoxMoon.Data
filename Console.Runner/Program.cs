@@ -36,7 +36,7 @@ namespace Console.Runner
             var ctx = serviceProvider.GetService<DatabaseContext>();
             ctx.Database.Migrate();
 
-            var plugin = new EntityPlugin( "com.blueboxmoon.test", new List<Type> { typeof( TestMigration ) } );
+            var plugin = new TestPlugin();
             ctx.Database.MigratePlugin( plugin );
 
             var peopleSet = ctx.GetDataSet<Person>();
@@ -51,12 +51,20 @@ namespace Console.Runner
         }
     }
 
+    public class TestPlugin : EntityPlugin
+    {
+        public override IEnumerable<Type> GetMigrations()
+        {
+            return new List<Type> { typeof( TestMigration ) };
+        }
+    }
+
     [Migration( "20200112_Initial" )]
     public class TestMigration : EntityMigration
     {
         protected override void Up( MigrationBuilder migrationBuilder )
         {
-            migrationBuilder.CreateEntityTable( "TestPlugin",
+            migrationBuilder.CreateEntityTable( "com_blueboxmoon_TestPlugin",
                 table => new
                 {
                     Value = table.Column<string>()
