@@ -25,7 +25,6 @@ using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
@@ -110,35 +109,5 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <typeparam name="T">The type of extension to be stored.</typeparam>
         /// <param name="extension">The extension instance.</param>
         void AddOrUpdateExtension<T>( T extension );
-    }
-
-    /// <summary>
-    /// Allows for creating transient database contexts within a single Unit Of Work.
-    /// </summary>
-    /// <typeparam name="TContext">The type of database context to create.</typeparam>
-    public interface IDbContextFactory<TContext>
-        where TContext : EntityDbContext
-    {
-        /// <summary>
-        /// Creates the context. The context should be disposed of as soon as possible.
-        /// </summary>
-        /// <returns>A new instance of <typeparamref name="TContext"/>.</returns>
-        TContext CreateContext();
-    }
-
-    public class DbContextFactory<TContext> : IDbContextFactory<TContext>
-        where TContext : EntityDbContext
-    {
-        private readonly IServiceProvider _serviceProvider;
-
-        public DbContextFactory( IServiceProvider serviceProvider )
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public TContext CreateContext()
-        {
-            return ActivatorUtilities.CreateInstance<TContext>( _serviceProvider );
-        }
     }
 }
