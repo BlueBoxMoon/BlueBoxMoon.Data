@@ -1,7 +1,10 @@
-﻿using BlueBoxMoon.Data.EntityFramework;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+using BlueBoxMoon.Data.EntityFramework;
 
 namespace Console.Runner
 {
+    [Table( "People", Schema = "testSchema" )]
     public class Person : Entity
     {
         public string FirstName { get; set; }

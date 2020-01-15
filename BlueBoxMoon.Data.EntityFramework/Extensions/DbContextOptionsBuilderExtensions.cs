@@ -22,11 +22,13 @@
 //
 using System;
 
+using BlueBoxMoon.Data.EntityFramework.Infrastructure;
 using BlueBoxMoon.Data.EntityFramework.Internals;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
@@ -35,34 +37,45 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// Configures the database context to use <see cref="EntityDbContext"/> options.
         /// </summary>
+        /// <typeparam name="TContext">The database context type to add.</typeparam>
         /// <param name="optionsBuilder">The builder being used to configure the context.</param>
-        /// <param name="entityOptionsAction">An optional action to allow additional configuration.</param>
+        /// <param name="optionsAction">The builder being used to configure the database context.</param>
+        /// <param name="entityOptionsAction">An optional action to allow additional configuration of the entity context.</param>
         /// <returns> The options builder so that further configuration can be chained. </returns>
-        public static DbContextOptionsBuilder UseEntityDbContext(
-            this DbContextOptionsBuilder optionsBuilder,
+        public static IServiceCollection AddEntityDbContext<TContext>(
+            this IServiceCollection serviceCollection,
+            Action<DbContextOptionsBuilder> optionsAction = null,
             Action<EntityDbContextOptionsBuilder> entityOptionsAction = null )
+            where TContext : EntityDbContext
         {
-            var extension = optionsBuilder.Options.FindExtension<EntityDbContextOptionsExtension>()
-                ?? new EntityDbContextOptionsExtension( optionsBuilder );
+            serviceCollection.AddSingleton<IDbContextFactory<TContext>, DbContextFactory<TContext>>();
 
-            ( ( IDbContextOptionsBuilderInfrastructure ) optionsBuilder ).AddOrUpdateExtension( extension );
+            serviceCollection.AddDbContext<TContext>( optionsBuilder =>
+            {
+                var extension = optionsBuilder.Options.FindExtension<EntityDbContextOptionsExtension>()
+                    ?? new EntityDbContextOptionsExtension( optionsBuilder ) { ApplicationServiceCollection = serviceCollection };
 
-            optionsBuilder.ReplaceService<IMigrationsAssembly, EntityMigrationsAssembly>();
-            entityOptionsAction?.Invoke( extension.Builder );
+                ( ( IDbContextOptionsBuilderInfrastructure ) optionsBuilder ).AddOrUpdateExtension( extension );
 
-            return optionsBuilder;
+                optionsBuilder.ReplaceService<IMigrationsAssembly, EntityMigrationsAssembly>();
+
+                optionsAction?.Invoke( optionsBuilder );
+                entityOptionsAction?.Invoke( extension.Builder );
+            } );
+
+            return serviceCollection;
         }
 
         /// <summary>
         /// Configures the database context to use <see cref="EntityDbContext"/> options.
         /// </summary>
         /// <param name="optionsBuilder">The builder being used to configure the context.</param>
-        /// <param name="entityOptionsAction">An optional action to allow additional configuration.</param>
+        /// <param name="entityOptionsAction">An optional action to allow additional configuration of the entity context.</param>
         /// <returns> The options builder so that further configuration can be chained. </returns>
-        public static DbContextOptionsBuilder<TContext> UseEntityDbContext<TContext>(
-            this DbContextOptionsBuilder<TContext> optionsBuilder,
+        public static IServiceCollection AddEntityDbContext<TContext>(
+            this IServiceCollection serviceCollection,
             Action<EntityDbContextOptionsBuilder> entityOptionsAction = null )
             where TContext : EntityDbContext
-            => ( DbContextOptionsBuilder<TContext> ) UseEntityDbContext( ( DbContextOptionsBuilder ) optionsBuilder, entityOptionsAction );
+            => AddEntityDbContext<TContext>( serviceCollection, null, entityOptionsAction );
     }
 }

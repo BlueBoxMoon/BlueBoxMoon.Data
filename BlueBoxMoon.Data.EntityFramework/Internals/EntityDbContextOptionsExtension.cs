@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 
+using BlueBoxMoon.Data.EntityFramework.Infrastructure;
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// </summary>
         public EntityDbContextOptionsBuilder Builder { get; }
 
+        /// <summary>
+        /// The application (parent) service collection.
+        /// </summary>
+        internal IServiceCollection ApplicationServiceCollection { get; set; }
+
         #endregion
 
         #region Constructors
@@ -87,13 +93,21 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// <param name="services"> The collection to add services to. </param>
         public void ApplyServices( IServiceCollection services )
         {
-            services.AddSingleton( serviceProvider =>
+            //
+            // Add a way for classes locked inside the DbContext scope to find
+            // the parent provider.
+            //
+            services.AddSingleton<IParentServiceProvider>( serviceProvider =>
             {
-                return ( IEntityDatabaseFeatures ) ActivatorUtilities.CreateInstance( serviceProvider, Builder.EntityDatabaseFeaturesType );
+                return new ParentServiceProvider( ApplicationServiceCollection.BuildServiceProvider() );
             } );
 
             services.AddScoped<IPluginMigrator, PluginMigrator>()
-                .AddScoped<PluginHistoryRepositoryDependencies>();
+                .AddScoped<PluginHistoryRepositoryDependencies>()
+                .AddSingleton( typeof( IEntityDatabaseFeatures ), Builder.EntityDatabaseFeaturesType );
+
+            var contextType = Builder.BaseOptionsBuilder.Options.ContextType;
+            services.AddSingleton( typeof( IDbContextFactory<> ).MakeGenericType( contextType ), typeof( DbContextFactory<> ).MakeGenericType( contextType ) );
 
             foreach ( var action in Builder.ApplyServiceActions )
             {

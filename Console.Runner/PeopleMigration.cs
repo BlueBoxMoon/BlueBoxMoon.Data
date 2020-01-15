@@ -18,7 +18,7 @@ namespace Console.Runner
                 {
                     FirstName = table.Column<string>( nullable: false, maxLength: 100 ),
                     LastName = table.Column<string>( nullable: false, maxLength: 100 )
-                } );
+                }, "testSchema" );
         }
 
         protected override void Down( MigrationBuilder migrationBuilder )

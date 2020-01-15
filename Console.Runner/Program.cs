@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using BlueBoxMoon.Data.EntityFramework;
+using BlueBoxMoon.Data.EntityFramework.Infrastructure;
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 using BlueBoxMoon.Data.EntityFramework.Sqlite;
 
@@ -20,16 +21,14 @@ namespace Console.Runner
         {
             var serviceCollection = new ServiceCollection()
                 .AddLogging( a => a.AddConsole() )
-                .AddDbContext<DatabaseContext>( options =>
+                .AddEntityDbContext<DatabaseContext>( options =>
                 {
                     options.UseSqlite( "Data Source=database.db" );
-                    options.UseEntityDbContext( o =>
-                    {
-                        o.UseSqlite();
-                        o.RegisterEntity<Person, PersonDataSet>();
-                    } );
-                } )
-                .AddSingleton<IDbContextFactory<DatabaseContext>, DbContextFactory<DatabaseContext>>();
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.RegisterEntity<Person, PersonDataSet>();
+                } );
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
