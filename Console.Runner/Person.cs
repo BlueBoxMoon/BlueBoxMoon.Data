@@ -7,9 +7,17 @@ namespace Console.Runner
     [Table( "People", Schema = "testSchema" )]
     public class Person : Entity
     {
-        public string FirstName { get; set; }
+        public string FirstName
+        {
+            get => ( string ) GetValue();
+            set => SetValue( value );
+        }
 
-        public string LastName { get; set; }
+        public string LastName
+        {
+            get => ( string ) GetValue();
+            set => SetValue( value );
+        }
     }
 
     public class PersonDataSet : DataSet<Person>

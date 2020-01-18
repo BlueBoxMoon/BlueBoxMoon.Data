@@ -146,7 +146,15 @@ namespace BlueBoxMoon.Data.EntityFramework
                 if ( typeof( IEntity ).IsAssignableFrom( type ) )
                 {
                     entityBuilder.HasIndex( nameof( Entity.Guid ) )
-                    .IsUnique();
+                        .IsUnique();
+                }
+
+                //
+                // If it's an Entity, mark it for changed notifications tracking.
+                //
+                if ( typeof( Entity ).IsAssignableFrom( type ) )
+                {
+                    entityBuilder.HasChangeTrackingStrategy( ChangeTrackingStrategy.ChangedNotifications );
                 }
             }
 
