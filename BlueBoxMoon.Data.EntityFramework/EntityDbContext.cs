@@ -121,10 +121,6 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// define extension methods on this object that allow you to configure aspects of the model that are specific
         /// to a given database.
         /// </param>
-        /// <remarks>
-        /// If a model is explicitly set on the options for this context (via <see cref="M:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
-        /// then this method will not be run.
-        /// </remarks>
         protected override void OnModelCreating( ModelBuilder modelBuilder )
         {
             base.OnModelCreating( modelBuilder );
@@ -257,7 +253,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <returns>A <see cref="DataSet{TEntity}"/> that can be used to interact with the database.</returns>
         public virtual DataSet<TEntity> GetDataSet<TEntity>()
-            where TEntity : Entity, new()
+            where TEntity : class, IEntity
         {
             var entityType = typeof( TEntity );
 
@@ -269,6 +265,27 @@ namespace BlueBoxMoon.Data.EntityFramework
             }
 
             return ( DataSet<TEntity> ) _dataSets[entityType];
+        }
+
+        /// <summary>
+        /// Gets the data set for <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>A <see cref="DataSet{TEntity}"/> that can be used to interact with the database.</returns>
+        public virtual TSet GetDataSet<TEntity, TSet>()
+            where TEntity : class, IEntity
+            where TSet : DataSet<TEntity>
+        {
+            var entityType = typeof( TEntity );
+
+            if ( !_dataSets.ContainsKey( entityType ) )
+            {
+                var setType = typeof( TSet );
+
+                _dataSets.Add( entityType, ActivatorUtilities.CreateInstance( this.GetInfrastructure(), setType, this ) );
+            }
+
+            return ( TSet ) _dataSets[entityType];
         }
 
         /// <summary>

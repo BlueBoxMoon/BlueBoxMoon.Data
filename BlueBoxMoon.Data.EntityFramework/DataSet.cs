@@ -39,7 +39,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// <seealso cref="System.Linq.IQueryable{T}" />
     /// <seealso cref="System.Collections.Generic.IAsyncEnumerable{T}" />
     public class DataSet<T> : IQueryable<T>, IAsyncEnumerable<T>
-        where T : Entity, new()
+        where T : class, IEntity
     {
         #region Properties
 
