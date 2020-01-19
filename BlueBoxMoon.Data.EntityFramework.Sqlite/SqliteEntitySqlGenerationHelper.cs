@@ -27,6 +27,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BlueBoxMoon.Data.EntityFramework.Sqlite
 {
+#pragma warning disable EF1001
     public class SqliteEntitySqlGenerationHelper : SqliteSqlGenerationHelper
     {
         public SqliteEntitySqlGenerationHelper( RelationalSqlGenerationHelperDependencies dependencies )
@@ -56,4 +57,5 @@ namespace BlueBoxMoon.Data.EntityFramework.Sqlite
             }
         }
     }
+#pragma warning restore EF1001
 }
