@@ -20,26 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using System;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
-    public interface IReadOnlyExtensible
+    /// <summary>
+    /// An exception that identifies an error about a call to get an extension
+    /// when that extension has not been installed.
+    /// </summary>
+    public class ExtensionNotFoundException : Exception
     {
-        /// <summary>
-        /// Finds the extension for the given type associated with this instance.
-        /// </summary>
-        /// <typeparam name="TExtension">The type of extension to retrieve.</typeparam>
-        /// <returns>An instance of <typeparamref name="TExtension"/> or <c>null</c> if not found.</returns>
-        TExtension FindExtension<TExtension>()
-            where TExtension : class;
+        #region Properties
 
         /// <summary>
-        /// Gets the extension for the given type associated with this instance. Throws
-        /// an exception if extension is not found.
+        /// The type of extension request that caused the exception.
         /// </summary>
-        /// <typeparam name="TExtension">The type of extension to retrieve.</typeparam>
-        /// <returns>An instance of <typeparamref name="TExtension"/>.</returns>
-        TExtension GetExtension<TExtension>()
-            where TExtension : class;
+        public Type ExtensionType { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExtensionNotFoundException"/> class.
+        /// </summary>
+        /// <param name="extensionType">The type of extension request that caused the exception.</param>
+        public ExtensionNotFoundException( Type extensionType )
+            : base( "Specified extension was not found." )
+        {
+            ExtensionType = extensionType;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExtensionNotFoundException"/> class.
+        /// </summary>
+        /// <param name="extensionType">The type of extension request that caused the exception.</param>
+        /// <param name="message">The exception message.</param>
+        public ExtensionNotFoundException( Type extensionType, string message )
+            : base( message )
+        {
+            ExtensionType = extensionType;
+        }
     }
 }

@@ -38,7 +38,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// <seealso cref="BlueBoxMoon.Data.EntityFramework.IEntity" />
     /// <seealso cref="BlueBoxMoon.Data.EntityFramework.IEntityChanges" />
     /// <seealso cref="BlueBoxMoon.Data.EntityFramework.IEntityValidation" />
-    public abstract class Entity : IEntity, IEntityChanges, IEntityValidation, INotifyPropertyChanged
+    public abstract class Entity : IEntity, IEntityChanges, IEntityValidation, INotifyPropertyChanged, IExtensible
     {
         #region Fields
 
@@ -51,6 +51,11 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// Backing store that holds property values.
         /// </summary>
         private Dictionary<string, object> _properties = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Backing store that holds all extension objects.
+        /// </summary>
+        private Dictionary<Type, object> _extensions = new Dictionary<Type, object>();
 
         #endregion
 
@@ -170,6 +175,56 @@ namespace BlueBoxMoon.Data.EntityFramework
         protected virtual void OnPropertyChanged( [CallerMemberName] string propertyName = null )
         {
             PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
+        }
+
+        #endregion
+
+        #region IExtensible
+
+        /// <summary>
+        /// Finds the extension for the given type associated with this instance.
+        /// </summary>
+        /// <typeparam name="TExtension">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="TExtension"/> or <c>null</c> if not found.</returns>
+        public TExtension FindExtension<TExtension>()
+            where TExtension : class
+        {
+            if ( _extensions.TryGetValue( typeof( TExtension ), out var extension ) )
+            {
+                return ( TExtension ) extension;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the extension for the given type associated with this instance. Throws
+        /// an exception if extension is not found.
+        /// </summary>
+        /// <typeparam name="TExtension">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="TExtension"/>.</returns>
+        public TExtension GetExtension<TExtension>()
+            where TExtension : class
+        {
+            var extension = FindExtension<TExtension>();
+
+            if ( extension == null )
+            {
+                throw new ExtensionNotFoundException( typeof( TExtension ) );
+            }
+
+            return extension;
+        }
+
+        /// <summary>
+        /// Adds or replaces an extension.
+        /// </summary>
+        /// <typeparam name="TExtension">The type of extension to be stored.</typeparam>
+        /// <param name="extension">The extension instance.</param>
+        public void AddOrReplaceExtension<TExtension>( TExtension extension )
+            where TExtension : class
+        {
+            _extensions[typeof( TExtension )] = extension;
         }
 
         #endregion

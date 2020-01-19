@@ -79,14 +79,14 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// Finds the extension for the given type associated with this instance.
         /// </summary>
-        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
-        /// <returns>An instance of <typeparamref name="T"/> or <c>null</c> if not found.</returns>
-        public T FindExtension<T>()
-            where T : class
+        /// <typeparam name="TExtension">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="TExtension"/> or <c>null</c> if not found.</returns>
+        public TExtension FindExtension<TExtension>()
+            where TExtension : class
         {
-            if ( _extensions.TryGetValue( typeof(T), out var extension ) )
+            if ( _extensions.TryGetValue( typeof( TExtension ), out var extension ) )
             {
-                return ( T ) extension;
+                return ( TExtension ) extension;
             }
 
             return null;
@@ -96,16 +96,16 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// Gets the extension for the given type associated with this instance. Throws
         /// an exception if extension is not found.
         /// </summary>
-        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
-        /// <returns>An instance of <typeparamref name="T"/>.</returns>
-        public T GetExtension<T>()
-            where T : class
+        /// <typeparam name="TExtension">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="TExtension"/>.</returns>
+        public TExtension GetExtension<TExtension>()
+            where TExtension : class
         {
-            var extension = FindExtension<T>();
+            var extension = FindExtension<TExtension>();
 
             if ( extension == null )
             {
-                throw new KeyNotFoundException( "Extension was not found" );
+                throw new ExtensionNotFoundException( typeof( TExtension ) );
             }
 
             return extension;
@@ -114,12 +114,12 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// Adds or replaces an extension.
         /// </summary>
-        /// <typeparam name="T">The type of extension to be stored.</typeparam>
+        /// <typeparam name="TExtension">The type of extension to be stored.</typeparam>
         /// <param name="extension">The extension instance.</param>
-        internal void AddOrReplaceExtension<T>( T extension )
-            where T : class
+        internal void AddOrReplaceExtension<TExtension>( TExtension extension )
+            where TExtension : class
         {
-            _extensions[typeof( T )] = extension;
+            _extensions[typeof( TExtension )] = extension;
         }
 
         #endregion

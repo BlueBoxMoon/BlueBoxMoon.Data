@@ -31,9 +31,9 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// Adds or replaces an extension.
         /// </summary>
-        /// <typeparam name="T">The type of extension to be stored.</typeparam>
+        /// <typeparam name="TExtension">The type of extension to be stored.</typeparam>
         /// <param name="extension">The extension instance.</param>
-        void AddOrReplaceExtension<T>( T extension )
-            where T : class;
+        void AddOrReplaceExtension<TExtension>( TExtension extension )
+            where TExtension : class;
     }
 }
