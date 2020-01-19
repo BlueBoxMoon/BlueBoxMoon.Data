@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Sqlite\BlueBoxMoon.Data.EntityFramework.Sqlite.csproj" />
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Common\BlueBoxMoon.Data.EntityFramework.Common.csproj" />
   </ItemGroup>
 
 </Project>
