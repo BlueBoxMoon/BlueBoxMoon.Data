@@ -13,5 +13,7 @@
     <Folder Include="Cache\" />
     <Folder Include="Cache\Internals\" />
     <Folder Include="Cache\Extensions\" />
+    <Folder Include="EntityTypes\Extensions\" />
+    <Folder Include="EntityTypes\Internals\" />
   </ItemGroup>
 </Project>

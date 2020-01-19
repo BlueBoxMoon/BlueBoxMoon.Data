@@ -27,11 +27,13 @@ namespace Console.Runner
                 }, entityOptions =>
                 {
                     entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<TestPlugin>();
                     entityOptions.WithEntity<Person, PersonDataSet>();
                     entityOptions.UseEntityCache( cacheOptions =>
                     {
                         cacheOptions.WithCachedType<Person, CachedPerson>();
                     } );
+                    entityOptions.UseEntityTypes();
                 } );
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -39,8 +41,8 @@ namespace Console.Runner
             var ctx = serviceProvider.GetService<DatabaseContext>();
             ctx.Database.Migrate();
 
-            var plugin = new TestPlugin();
-            ctx.Database.MigratePlugin( plugin );
+            ctx.Database.MigratePlugins();
+            ctx.Database.InitializePlugins();
 
             var peopleSet = ctx.GetDataSet<Person>();
             peopleSet.Add( new Person { FirstName = "Daniel", LastName = Guid.NewGuid().ToString() } );
