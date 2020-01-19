@@ -32,7 +32,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// <summary>
     /// Extension methods for the <see cref="EntityDbContextOptionsBuilder"/> class.
     /// </summary>
-    public static class EntityDbContextOptionsBuilderExtensions
+    public static class EntityCacheEntityDbContextOptionsBuilderExtensions
     {
         /// <summary>
         /// Enables use of caching for this entity database context.
