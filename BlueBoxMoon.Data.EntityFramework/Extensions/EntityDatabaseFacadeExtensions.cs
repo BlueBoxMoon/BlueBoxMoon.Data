@@ -45,5 +45,49 @@ namespace BlueBoxMoon.Data.EntityFramework
 
             migrator.Migrate( plugin );
         }
+
+        /// <summary>
+        /// Migrates all plugins to the latest version possible.
+        /// </summary>
+        /// <param name="databaseFacade">The database facade.</param>
+        public static void MigratePlugins( this DatabaseFacade databaseFacade )
+        {
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
+            var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
+            var context = ( EntityDbContext ) currentContext.Context;
+
+            foreach ( var plugin in context.EntityContextOptions.Plugins )
+            {
+                migrator.Migrate( plugin );
+            }
+        }
+
+        /// <summary>
+        /// Initializes a plugin and gives it a chance to perform any database operations.
+        /// </summary>
+        /// <param name="databaseFacade">The database facade.</param>
+        /// <param name="plugin">The plugin to be initialized.</param>
+        public static void InitializePlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        {
+            var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
+            var context = ( EntityDbContext ) currentContext.Context;
+
+            plugin.Initialize( context );
+        }
+
+        /// <summary>
+        /// Initializes all plugins and gives them a chance to perform any database operations.
+        /// </summary>
+        /// <param name="databaseFacade">The database facade.</param>
+        public static void InitializePlugins( this DatabaseFacade databaseFacade )
+        {
+            var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
+            var context = ( EntityDbContext ) currentContext.Context;
+
+            foreach ( var plugin in context.EntityContextOptions.Plugins )
+            {
+                plugin.Initialize( context );
+            }
+        }
     }
 }

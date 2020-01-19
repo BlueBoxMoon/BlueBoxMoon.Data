@@ -89,6 +89,15 @@ namespace BlueBoxMoon.Data.EntityFramework
         {
         }
 
+        /// <summary>
+        /// Called by application code early in the app life cycle to initialize
+        /// all plugins. Will be called sometime after migrations have run.
+        /// </summary>
+        /// <param name="context">The database context the plugin can make changes in.</param>
+        public virtual void Initialize( EntityDbContext context )
+        {
+        }
+
         #endregion
     }
 }
