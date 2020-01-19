@@ -27,7 +27,11 @@ namespace Console.Runner
                 }, entityOptions =>
                 {
                     entityOptions.UseSqlite();
-                    entityOptions.RegisterEntity<Person, PersonDataSet>();
+                    entityOptions.WithEntity<Person, PersonDataSet>();
+                    entityOptions.UseEntityCache( cacheOptions =>
+                    {
+                        cacheOptions.WithCachedType<Person, CachedPerson>();
+                    } );
                 } );
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -45,6 +49,9 @@ namespace Console.Runner
             var ctxFactory = serviceProvider.GetService<IDbContextFactory<DatabaseContext>>();
             using ( var ctx2 = ctxFactory.CreateContext() )
             {
+                var cachedSet = ctx2.GetCachedDataSet<CachedPerson>();
+                var p1 = cachedSet.GetById( 2 );
+                var p2 = cachedSet.GetById( 2 );
                 var list = peopleSet.ToList();
             }
         }
