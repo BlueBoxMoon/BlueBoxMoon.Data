@@ -305,7 +305,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
 
             if ( migrations.Count == 0 )
             {
-                Logger.LogInformation( LoggingEvents.MigrationsNotFoundId, LoggingEvents.MigrationsNotFound );
+                Logger.LogInformation( LoggingEvents.MigrationsNotFoundId, LoggingEvents.MigrationsNotFound, plugin.Name );
             }
 
             //
