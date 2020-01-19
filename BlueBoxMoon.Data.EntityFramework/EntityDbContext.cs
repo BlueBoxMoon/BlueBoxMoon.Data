@@ -53,7 +53,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// Defines the options used by this database context.
         /// </summary>
-        protected EntityDbContextOptions EntityContextOptions { get; }
+        public EntityDbContextOptions EntityContextOptions { get; }
 
         /// <summary>
         /// Contains the options this context was constructed with.

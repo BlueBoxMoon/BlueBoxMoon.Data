@@ -109,6 +109,14 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
             var contextType = Builder.BaseOptionsBuilder.Options.ContextType;
             services.AddSingleton( typeof( IDbContextFactory<> ).MakeGenericType( contextType ), typeof( DbContextFactory<> ).MakeGenericType( contextType ) );
 
+            //
+            // Let plugins add additional services.
+            //
+            foreach ( var plugin in Builder.Options.Plugins )
+            {
+                plugin.ApplyServices( services, Builder.Options );
+            }
+
             foreach ( var action in Builder.ApplyServiceActions )
             {
                 action( services );

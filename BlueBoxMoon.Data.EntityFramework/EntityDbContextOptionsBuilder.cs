@@ -112,6 +112,19 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
+        /// Includes the specified plugin.
+        /// </summary>
+        /// <typeparam name="TPlugin">The plugin to be included.</typeparam>
+        /// <returns>An <see cref="EntityDbContextOptionsBuilder"/> that can be used to further configure options.</returns>
+        public EntityDbContextOptionsBuilder WithPlugin<TPlugin>()
+            where TPlugin : EntityPlugin, new()
+        {
+            ( ( List<EntityPlugin> ) Options.Plugins ).Add( new TPlugin() );
+
+            return this;
+        }
+
+        /// <summary>
         /// Sets the database provider features type that will provide
         /// database-specific functionality.
         /// </summary>

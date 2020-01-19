@@ -53,6 +53,14 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </value>
         public IReadOnlyDictionary<Type, EntitySettings> RegisteredEntities { get; } = new Dictionary<Type, EntitySettings>();
 
+        /// <summary>
+        /// Gets the registered plugins.
+        /// </summary>
+        /// <value>
+        /// The registered plugins.
+        /// </value>
+        public IReadOnlyList<EntityPlugin> Plugins { get; } = new List<EntityPlugin>();
+
         #endregion
 
         #region Constructors

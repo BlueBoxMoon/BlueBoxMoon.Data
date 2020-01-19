@@ -29,6 +29,7 @@ using BlueBoxMoon.Data.EntityFramework.Migrations;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
@@ -76,6 +77,15 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </summary>
         /// <param name="modelBuilder">The instance that handles building the model.</param>
         public virtual void OnModelCreating( ModelBuilder modelBuilder )
+        {
+        }
+
+        /// <summary>
+        /// Called when the services are being registered in the DbContext.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection that can have additional services registered in.</param>
+        /// <param name="entityDbContextOptions">The <see cref="EntityDbContextOptions"/> for this context.</param>
+        public virtual void ApplyServices( IServiceCollection serviceCollection, EntityDbContextOptions entityDbContextOptions )
         {
         }
 
