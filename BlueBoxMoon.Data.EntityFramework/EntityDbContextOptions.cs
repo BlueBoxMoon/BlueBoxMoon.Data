@@ -29,8 +29,14 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// Defines the configuration options that will be used by
     /// <see cref="EntityDbContext"/> instances.
     /// </summary>
-    public class EntityDbContextOptions
+    public class EntityDbContextOptions : IReadOnlyExtensible
     {
+        #region Fields
+
+        private Dictionary<Type, object> _extensions = new Dictionary<Type, object>();
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -56,6 +62,56 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </summary>
         internal EntityDbContextOptions()
         {
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Finds the extension for the given type associated with this instance.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/> or <c>null</c> if not found.</returns>
+        public T FindExtension<T>()
+            where T : class
+        {
+            if ( _extensions.TryGetValue( typeof(T), out var extension ) )
+            {
+                return ( T ) extension;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the extension for the given type associated with this instance. Throws
+        /// an exception if extension is not found.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>.</returns>
+        public T GetExtension<T>()
+            where T : class
+        {
+            var extension = FindExtension<T>();
+
+            if ( extension == null )
+            {
+                throw new KeyNotFoundException( "Extension was not found" );
+            }
+
+            return extension;
+        }
+
+        /// <summary>
+        /// Adds or replaces an extension.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to be stored.</typeparam>
+        /// <param name="extension">The extension instance.</param>
+        internal void AddOrReplaceExtension<T>( T extension )
+            where T : class
+        {
+            _extensions[typeof( T )] = extension;
         }
 
         #endregion

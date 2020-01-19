@@ -31,7 +31,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// Provides a fluent interface to building the options for the
     /// <see cref="EntityDbContext"/> class.
     /// </summary>
-    public class EntityDbContextOptionsBuilder
+    public class EntityDbContextOptionsBuilder : IExtensible
     {
         #region Properties
 
@@ -182,6 +182,44 @@ namespace BlueBoxMoon.Data.EntityFramework
             ( ( List<EntityDbContextSaveHooks> ) Options.SaveHooks ).Add( saveHook );
 
             return this;
+        }
+
+        #endregion
+
+        #region IExtensible
+
+        /// <summary>
+        /// Finds the extension for the given type associated with this instance.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/> or <c>null</c> if not found.</returns>
+        public T FindExtension<T>()
+            where T : class
+        {
+            return Options.FindExtension<T>();
+        }
+
+        /// <summary>
+        /// Gets the extension for the given type associated with this instance. Throws
+        /// an exception if extension is not found.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>.</returns>
+        public T GetExtension<T>()
+            where T : class
+        {
+            return Options.GetExtension<T>();
+        }
+
+        /// <summary>
+        /// Adds or replaces an extension.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to be stored.</typeparam>
+        /// <param name="extension">The extension instance.</param>
+        public void AddOrReplaceExtension<T>( T extension )
+            where T : class
+        {
+            Options.AddOrReplaceExtension( extension );
         }
 
         #endregion

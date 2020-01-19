@@ -23,17 +23,23 @@
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
-    /// <summary>
-    /// Defines an interface that allows for objects to store custom extension data.
-    /// </summary>
-    public interface IExtensible : IReadOnlyExtensible
+    public interface IReadOnlyExtensible
     {
         /// <summary>
-        /// Adds or replaces an extension.
+        /// Finds the extension for the given type associated with this instance.
         /// </summary>
-        /// <typeparam name="T">The type of extension to be stored.</typeparam>
-        /// <param name="extension">The extension instance.</param>
-        void AddOrReplaceExtension<T>( T extension )
+        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/> or <c>null</c> if not found.</returns>
+        T FindExtension<T>()
+            where T : class;
+
+        /// <summary>
+        /// Gets the extension for the given type associated with this instance. Throws
+        /// an exception if extension is not found.
+        /// </summary>
+        /// <typeparam name="T">The type of extension to retrieve.</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/>.</returns>
+        T GetExtension<T>()
             where T : class;
     }
 }
