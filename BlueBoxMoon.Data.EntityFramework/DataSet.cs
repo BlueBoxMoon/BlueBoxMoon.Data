@@ -106,7 +106,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>The matched <see cref="T"/> or <c>null</c> if not found.</returns>
-        public virtual T GetById( int id )
+        public virtual T GetById( long id )
         {
             return DbSet.FirstOrDefault( a => a.Id == id );
         }
@@ -116,7 +116,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <returns>The matched <see cref="T"/> or <c>null</c> if not found.</returns>
-        public virtual async Task<T> GetByIdAsync( int id )
+        public virtual async Task<T> GetByIdAsync( long id )
         {
             return await DbSet.FirstOrDefaultAsync( a => a.Id == id );
         }
