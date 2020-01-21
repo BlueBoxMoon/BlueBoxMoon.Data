@@ -74,6 +74,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// The unique identifier of the entity.
         /// </summary>
         [Key]
+        [Required]
         public long Id
         {
             get => ( long? ) GetValue() ?? 0;
@@ -83,6 +84,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <summary>
         /// The globally unique identifier of the entity.
         /// </summary>
+        [Required]
         public Guid Guid
         {
             get => ( Guid ) GetValue();

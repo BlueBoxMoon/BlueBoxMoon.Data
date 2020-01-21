@@ -22,15 +22,15 @@
 //
 using System;
 
-using BlueBoxMoon.Data.EntityFramework.EntityTypes;
+using BlueBoxMoon.Data.EntityFramework.Cache;
 using BlueBoxMoon.Data.EntityFramework.EntityTypes.Internals;
 
-namespace BlueBoxMoon.Data.EntityFramework
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
 {
     /// <summary>
     /// Extension methods for the <see cref="EntityDbContextOptionsBuilder"/> class.
     /// </summary>
-    public static class EntityTypesEntityDbContextOptionsBuilderExtensions
+    public static class EntityDbContextOptionsBuilderExtensions
     {
         /// <summary>
         /// Enables use of entity types for this entity database context.

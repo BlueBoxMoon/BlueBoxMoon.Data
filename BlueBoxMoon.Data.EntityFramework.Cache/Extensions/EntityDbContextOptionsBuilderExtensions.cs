@@ -22,17 +22,16 @@
 //
 using System;
 
-using BlueBoxMoon.Data.EntityFramework.Cache;
 using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
 using Microsoft.Extensions.Caching.Memory;
 
-namespace BlueBoxMoon.Data.EntityFramework
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// Extension methods for the <see cref="EntityDbContextOptionsBuilder"/> class.
     /// </summary>
-    public static class EntityCacheEntityDbContextOptionsBuilderExtensions
+    public static class EntityDbContextOptionsBuilderExtensions
     {
         /// <summary>
         /// Enables use of caching for this entity database context.

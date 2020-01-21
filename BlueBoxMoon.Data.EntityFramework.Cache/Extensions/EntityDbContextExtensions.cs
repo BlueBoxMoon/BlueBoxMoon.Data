@@ -22,18 +22,17 @@
 //
 using System;
 
-using BlueBoxMoon.Data.EntityFramework.Cache;
 using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BlueBoxMoon.Data.EntityFramework
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// Extension methods for the <see cref="EntityDbContext"/> class.
     /// </summary>
-    public static class EntityCacheEntityDbContextExtensions
+    public static class EntityDbContextExtensions
     {
         /// <summary>
         /// Gets the <see cref="ICachedDataSet{TCached}"/> instance that can be used to

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using BlueBoxMoon.Data.EntityFramework;
+using BlueBoxMoon.Data.EntityFramework.Cache;
+using BlueBoxMoon.Data.EntityFramework.EntityTypes;
 using BlueBoxMoon.Data.EntityFramework.Infrastructure;
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 using BlueBoxMoon.Data.EntityFramework.Sqlite;
