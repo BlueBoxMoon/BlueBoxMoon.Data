@@ -33,9 +33,14 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals
     internal class EntityCacheOptions
     {
         /// <summary>
-        /// The cached types by CachedEntty type key.
+        /// The cached types by CachedEntity type key.
         /// </summary>
         public Dictionary<Type, CachedTypeLookup> CachedTypesByCachedEntity { get; } = new Dictionary<Type, CachedTypeLookup>();
+
+        /// <summary>
+        /// The cached types by Entity type key.
+        /// </summary>
+        public Dictionary<Type, CachedTypeLookup> CachedTypesByEntity { get; } = new Dictionary<Type, CachedTypeLookup>();
 
         /// <summary>
         /// The memory cache to use.

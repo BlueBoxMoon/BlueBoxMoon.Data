@@ -72,6 +72,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
             if ( !_options.CachedTypesByCachedEntity.ContainsKey( typeof( TCached ) ) )
             {
                 _options.CachedTypesByCachedEntity.Add( typeof( TCached ), lookup );
+                _options.CachedTypesByEntity.Add( typeof( TEntity ), lookup );
             }
 
             return this;

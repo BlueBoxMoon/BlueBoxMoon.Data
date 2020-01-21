@@ -54,6 +54,7 @@ namespace BlueBoxMoon.Data.EntityFramework
 
             entityOptionsBuilder.AddOrReplaceExtension( options );
             entityOptionsBuilder.WithPlugin<CachePlugin>();
+            entityOptionsBuilder.UseSaveHook<CachedEntitySaveHook>();
 
             var optionsBuilder = new EntityCacheOptionsBuilder( options );
             optionsAction?.Invoke( optionsBuilder );

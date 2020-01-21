@@ -26,6 +26,7 @@ using System.Linq;
 
 using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -89,6 +90,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
         {
             var idList = _cache.GetOrCreate( GetAllCacheKey(), entry =>
             {
+                entry.Size = 0;
+
                 return DbContext.GetDataSet<TEntity>()
                     .Select( a => a.Id )
                     .ToList();
@@ -160,6 +163,31 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
         }
 
         /// <summary>
+        /// Called when a cachable entity has changed. This will update the cache
+        /// with the new information about the entity.
+        /// </summary>
+        /// <param name="entity">The entity that was changed.</param>
+        /// <param name="state">The state of the entity when it was saved.</param>
+        public void EntityChanged( IEntity entity, EntityState state )
+        {
+            if ( state == EntityState.Deleted )
+            {
+                Remove( entity.Id );
+            }
+            else
+            {
+                if ( !_cache.TryGetValue<TCached>( GetIdCacheKey( entity.Id ), out var cached ) )
+                {
+                    AddEntityToCache( ( TEntity ) entity );
+                }
+                else
+                {
+                    cached.UpdateFromEntity( entity );
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the cache key associated with all items.
         /// </summary>
         /// <returns>The cache key string.</returns>
@@ -215,11 +243,13 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
         {
             using ( var entry = _cache.CreateEntry( GetIdCacheKey( cachedEntity.Id ) ) )
             {
+                entry.Size = 1;
                 entry.SetValue( cachedEntity );
             }
 
             using ( var entry = _cache.CreateEntry( GetGuidCacheKey( cachedEntity.Guid ) ) )
             {
+                entry.Size = 1;
                 entry.SetValue( cachedEntity.Id );
             }
 

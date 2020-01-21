@@ -45,16 +45,21 @@ namespace Console.Runner
             ctx.Database.InitializePlugins();
 
             var peopleSet = ctx.GetDataSet<Person>();
-            peopleSet.Add( new Person { FirstName = "Daniel", LastName = Guid.NewGuid().ToString() } );
+            var c1 = ctx.GetCachedDataSet<CachedPerson>().GetById( 1 );
+            var p1 = new Person { FirstName = "Daniel", LastName = Guid.NewGuid().ToString() };
+            peopleSet.Add( p1 );
             ctx.SaveChanges();
+            var c2 = ctx.GetCachedDataSet<CachedPerson>().GetById( 1 );
 
             var ctxFactory = serviceProvider.GetService<IDbContextFactory<DatabaseContext>>();
             using ( var ctx2 = ctxFactory.CreateContext() )
             {
+                var p2 = ctx2.GetDataSet<Person>().GetById( 1 );
+                p2.LastName = Guid.NewGuid().ToString();
+                ctx2.SaveChanges();
                 var cachedSet = ctx2.GetCachedDataSet<CachedPerson>();
-                var p1 = cachedSet.GetById( 2 );
-                var p2 = cachedSet.GetById( 2 );
-                var list = peopleSet.ToList();
+                var c3 = cachedSet.GetById( 1 );
+                var list = ctx2.GetDataSet<Person>().ToList();
             }
         }
     }

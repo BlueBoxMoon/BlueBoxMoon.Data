@@ -23,6 +23,7 @@
 using System;
 
 using BlueBoxMoon.Data.EntityFramework.Common.Cache;
+using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
 
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +33,7 @@ namespace BlueBoxMoon.Data.EntityFramework
     /// <summary>
     /// Extension methods for the <see cref="EntityDbContext"/> class.
     /// </summary>
-    public static class EntityDbContextExtensions
+    public static class EntityCacheEntityDbContextExtensions
     {
         /// <summary>
         /// Gets the <see cref="ICachedDataSet{TCached}"/> instance that can be used to
@@ -48,6 +49,33 @@ namespace BlueBoxMoon.Data.EntityFramework
             var serviceProvider = ( ( IInfrastructure<IServiceProvider> ) entityDbContext ).Instance;
 
             return serviceProvider.GetService<ICachedDataSet<TCached>>();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ICachedDataSet{TCached}"/> instance that can be used to
+        /// interact with the cache.
+        /// </summary>
+        /// <param name="entityDbContext">The <see cref="EntityDbContext"/> controlling database access.</param>
+        /// <param name="cachedType">The cached type whose dataset is to be retrieved.</param>
+        /// <returns>An instance of <see cref="ICachedDataSet{TCached}"/> or <c>null</c> if no implementation found.</returns>
+        public static ICachedDataSet<CachedEntity> GetCachedDataSet(
+            this EntityDbContext entityDbContext,
+            Type cachedType )
+        {
+            if ( !typeof( ICachedEntity ).IsAssignableFrom( cachedType ) )
+            {
+                throw new ArgumentException( $"Type must inherit from {nameof( ICachedEntity )}", nameof( cachedType ) );
+            }
+
+            var lookup = entityDbContext.EntityContextOptions
+                .GetExtension<EntityCacheOptions>()
+                .CachedTypesByCachedEntity[cachedType];
+
+            var serviceProvider = ( ( IInfrastructure<IServiceProvider> ) entityDbContext ).Instance;
+
+            var iCachedDataSetType = typeof( ICachedDataSet<> ).MakeGenericType( lookup.CachedType );
+
+            return ( ICachedDataSet<CachedEntity> ) serviceProvider.GetService( iCachedDataSetType );
         }
     }
 }

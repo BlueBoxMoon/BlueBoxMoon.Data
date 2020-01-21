@@ -22,6 +22,7 @@
 //
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
 {
@@ -29,7 +30,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
     /// Specifies the requirements of a cached data set.
     /// </summary>
     /// <typeparam name="TCached"></typeparam>
-    public interface ICachedDataSet<TCached>
+    public interface ICachedDataSet<out TCached>
         where TCached : class, ICachedEntity, new()
     {
         /// <summary>
@@ -58,5 +59,13 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
         /// </summary>
         /// <param name="id">The identifier of the item to be removed.</param>
         void Remove( long id );
+
+        /// <summary>
+        /// Called when a cachable entity has changed. This will update the cache
+        /// with the new information about the entity.
+        /// </summary>
+        /// <param name="entity">The entity that was changed.</param>
+        /// <param name="state">The state of the entity when it was saved.</param>
+        void EntityChanged( IEntity entity, EntityState state );
     }
 }

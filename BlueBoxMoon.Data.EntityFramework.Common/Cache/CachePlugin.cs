@@ -60,11 +60,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
         public override void ApplyServices( IServiceCollection serviceCollection, EntityDbContextOptions entityDbContextOptions )
         {
             var options = entityDbContextOptions.GetExtension<EntityCacheOptions>();
-            var iCachedDataSetType = typeof( ICachedDataSet<> );
+            var genericCachedDataSetType = typeof( ICachedDataSet<> );
 
             foreach ( var lookup in options.CachedTypesByCachedEntity.Values )
             {
-                serviceCollection.AddScoped( iCachedDataSetType.MakeGenericType( lookup.CachedType ), lookup.CachedDataSetType );
+                serviceCollection.AddScoped( genericCachedDataSetType.MakeGenericType( lookup.CachedType ), lookup.CachedDataSetType );
             }
         }
     }
