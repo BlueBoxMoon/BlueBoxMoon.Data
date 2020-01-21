@@ -24,11 +24,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
+using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// Defines the save hook for Entity Cache plugin to update all cached

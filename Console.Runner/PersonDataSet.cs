@@ -1,5 +1,4 @@
-﻿
-using BlueBoxMoon.Data.EntityFramework;
+﻿using BlueBoxMoon.Data.EntityFramework;
 
 namespace Console.Runner
 {

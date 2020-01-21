@@ -21,41 +21,30 @@
 // SOFTWARE.
 //
 using System;
+using System.Collections.Generic;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals
+using Microsoft.Extensions.Caching.Memory;
+
+namespace BlueBoxMoon.Data.EntityFramework.Cache.Internals
 {
     /// <summary>
-    /// Provides initialization information about cached types.
+    /// The options used at runtime for the Entity Cache plugin.
     /// </summary>
-    internal class CachedTypeLookup
+    internal class EntityCacheOptions
     {
         /// <summary>
-        /// The primary <see cref="Entity"/> type.
+        /// The cached types by CachedEntity type key.
         /// </summary>
-        public Type EntityType { get; }
+        public Dictionary<Type, CachedTypeLookup> CachedTypesByCachedEntity { get; } = new Dictionary<Type, CachedTypeLookup>();
 
         /// <summary>
-        /// The cached <see cref="CachedEntity"/> entity.
+        /// The cached types by Entity type key.
         /// </summary>
-        public Type CachedType { get; }
+        public Dictionary<Type, CachedTypeLookup> CachedTypesByEntity { get; } = new Dictionary<Type, CachedTypeLookup>();
 
         /// <summary>
-        /// The <see cref="CachedDataSet{TEntity, TCached}"/> that will provide
-        /// cached lookup functionality.
+        /// The memory cache to use.
         /// </summary>
-        public Type CachedDataSetType { get; }
-
-        /// <summary>
-        /// Create a new instance of the <see cref="CachedTypeLookup"/> class.
-        /// </summary>
-        /// <param name="entityType">The entity type to be cached.</param>
-        /// <param name="cachedType">The cached type that will provide details about <paramref name="entityType"/>.</param>
-        /// <param name="cachedDataSetType">The cached data set provider.</param>
-        public CachedTypeLookup( Type entityType, Type cachedType, Type cachedDataSetType )
-        {
-            EntityType = entityType;
-            CachedType = cachedType;
-            CachedDataSetType = cachedDataSetType;
-        }
+        public IMemoryCache MemoryCache { get; internal set; }
     }
 }

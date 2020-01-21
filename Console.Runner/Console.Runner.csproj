@@ -6,15 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Sqlite\BlueBoxMoon.Data.EntityFramework.Sqlite.csproj" />
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
-    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Common\BlueBoxMoon.Data.EntityFramework.Common.csproj" />
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Cache\BlueBoxMoon.Data.EntityFramework.Cache.csproj" />
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.EntityTypes\BlueBoxMoon.Data.EntityFramework.EntityTypes.csproj" />
   </ItemGroup>
 
 </Project>

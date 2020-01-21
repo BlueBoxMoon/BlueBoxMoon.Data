@@ -24,13 +24,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
+using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// A cached dataset handles interacting with the cache on behalf of

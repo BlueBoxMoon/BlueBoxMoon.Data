@@ -26,7 +26,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.EntityTypes
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
 {
     public class EntityTypesPlugin : EntityPlugin
     {

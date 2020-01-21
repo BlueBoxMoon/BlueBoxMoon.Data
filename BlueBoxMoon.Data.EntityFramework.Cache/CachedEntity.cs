@@ -20,39 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using BlueBoxMoon.Data.EntityFramework.Common.EntityTypes.Internals;
+using System;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.EntityTypes
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
-    /// Initializes the Entity Types Plugin options.
+    /// The base cached entity object.
     /// </summary>
-    public class EntityTypesOptionsBuilder
+    public class CachedEntity : ICachedEntity
     {
-        #region Fields
+        /// <summary>
+        /// The unique identifier of the entity.
+        /// </summary>
+        public long Id { get; private set; }
 
         /// <summary>
-        /// Reference to the options.
+        /// The globally unique identifier of the entity.
         /// </summary>
-        private EntityTypesOptions _options;
-
-        #endregion
-
-        #region Constructors
+        public Guid Guid { get; private set; }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="EntityTypesOptionsBuilder"/> class.
+        /// Updates the cached information from the entity.
         /// </summary>
-        /// <param name="options">The options to be built.</param>
-        internal EntityTypesOptionsBuilder( EntityTypesOptions options )
+        /// <param name="entity">The database entity.</param>
+        public virtual void UpdateFromEntity( IEntity entity )
         {
-            _options = options;
+            Id = entity.Id;
+            Guid = entity.Guid;
         }
-
-        #endregion
-
-        #region Methods
-
-        #endregion
     }
 }

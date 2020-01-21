@@ -22,9 +22,9 @@
 //
 using System;
 
-using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
+using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// Initializes the Cache Plugin options.

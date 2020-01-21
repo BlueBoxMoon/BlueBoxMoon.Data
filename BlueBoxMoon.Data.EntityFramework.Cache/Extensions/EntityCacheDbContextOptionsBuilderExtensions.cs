@@ -22,8 +22,8 @@
 //
 using System;
 
-using BlueBoxMoon.Data.EntityFramework.Common.Cache;
-using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
+using BlueBoxMoon.Data.EntityFramework.Cache;
+using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
 using Microsoft.Extensions.Caching.Memory;
 

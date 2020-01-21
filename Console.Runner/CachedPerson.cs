@@ -1,6 +1,6 @@
 ﻿
 using BlueBoxMoon.Data.EntityFramework;
-using BlueBoxMoon.Data.EntityFramework.Common.Cache;
+using BlueBoxMoon.Data.EntityFramework.Cache;
 
 namespace Console.Runner
 {

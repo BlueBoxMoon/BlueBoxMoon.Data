@@ -20,29 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
+using BlueBoxMoon.Data.EntityFramework.Migrations;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes.Migrations
 {
-    /// <summary>
-    /// The base interface of all cached entity objects.
-    /// </summary>
-    public interface ICachedEntity
+    [Migration( "202001191257")]
+    public class Initialize : EntityMigration
     {
-        /// <summary>
-        /// The unique identifier of the entity.
-        /// </summary>
-        long Id { get; }
+        protected override void Up( MigrationBuilder migrationBuilder )
+        {
+            migrationBuilder.CreateEntityTable( "EntityTypes",
+                table => new
+                {
+                    Name = table.Column<string>( nullable: false, maxLength: 100 ),
+                    QualifiedName = table.Column<string>( nullable: false, maxLength: 250 )
+                },
+                EntityTypesPlugin.Schema,
+                table =>
+                {
+                    table.UniqueConstraint( "IX_EntityTypes_Name", a => a.Name );
+                    table.UniqueConstraint( "IX_EntityTypes_QualifiedName", a => a.QualifiedName );
+                } );
+        }
 
-        /// <summary>
-        /// The globally unique identifier of the entity.
-        /// </summary>
-        Guid Guid { get; }
-
-        /// <summary>
-        /// Updates the cached information from the entity.
-        /// </summary>
-        /// <param name="entity">The database entity.</param>
-        void UpdateFromEntity( IEntity entity );
+        protected override void Down( MigrationBuilder migrationBuilder )
+        {
+            migrationBuilder.DropTable( "EntityTypes", EntityTypesPlugin.Schema );
+        }
     }
 }

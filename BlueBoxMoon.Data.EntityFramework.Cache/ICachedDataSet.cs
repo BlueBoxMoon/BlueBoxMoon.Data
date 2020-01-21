@@ -22,9 +22,10 @@
 //
 using System;
 using System.Collections.Generic;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// Specifies the requirements of a cached data set.

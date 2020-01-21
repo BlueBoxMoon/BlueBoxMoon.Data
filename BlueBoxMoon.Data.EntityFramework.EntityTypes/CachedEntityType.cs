@@ -20,39 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.InteropServices;
+using BlueBoxMoon.Data.EntityFramework.Cache;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.EntityTypes
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
 {
     /// <summary>
-    /// Defines an entity that will be recorded in the database.
+    /// Defines a cached <see cref="EntityType"/> object.
     /// </summary>
-    [Table( "EntityTypes", Schema = EntityTypesPlugin.Schema )]
-    [Guid( "bcaa4196-9fda-45c1-88da-7cf920a7a0fb" )]
-    public class EntityType : Entity
+    public class CachedEntityType : CachedEntity
     {
         /// <summary>
         /// The full class name of the entity.
         /// </summary>
-        [Required]
-        [MaxLength( 100 )]
-        public string Name
-        {
-            get => ( string ) GetValue();
-            set => SetValue( value );
-        }
+        public string Name { get; private set; }
 
         /// <summary>
         /// The fully qualified class name and assembly information.
         /// </summary>
-        [Required]
-        [MaxLength( 250 )]
-        public string QualifiedName
+        public string QualifiedName { get; private set; }
+
+        /// <summary>
+        /// Updates the cached information from the entity.
+        /// </summary>
+        /// <param name="entity">The database entity.</param>
+        public override void UpdateFromEntity( IEntity entity )
         {
-            get => ( string ) GetValue();
-            set => SetValue( value );
+            base.UpdateFromEntity( entity );
+
+            var entityType = ( EntityType ) entity;
+
+            Name = entityType.Name;
+            QualifiedName = entityType.QualifiedName;
         }
     }
 }

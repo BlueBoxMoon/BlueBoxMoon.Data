@@ -20,15 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
-using System.Collections.Generic;
+using BlueBoxMoon.Data.EntityFramework.EntityTypes.Internals;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.EntityTypes.Internals
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
 {
     /// <summary>
-    /// The options used at runtime for the Entity Types plugin.
+    /// Initializes the Entity Types Plugin options.
     /// </summary>
-    internal class EntityTypesOptions
+    public class EntityTypesOptionsBuilder
     {
+        #region Fields
+
+        /// <summary>
+        /// Reference to the options.
+        /// </summary>
+        private EntityTypesOptions _options;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="EntityTypesOptionsBuilder"/> class.
+        /// </summary>
+        /// <param name="options">The options to be built.</param>
+        internal EntityTypesOptionsBuilder( EntityTypesOptions options )
+        {
+            _options = options;
+        }
+
+        #endregion
+
+        #region Methods
+
+        #endregion
     }
 }

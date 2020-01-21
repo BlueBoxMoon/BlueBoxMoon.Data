@@ -20,37 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using BlueBoxMoon.Data.EntityFramework.Common.Cache;
+using System;
+using System.Collections.Generic;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.EntityTypes
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes.Internals
 {
     /// <summary>
-    /// Defines a cached <see cref="EntityType"/> object.
+    /// The options used at runtime for the Entity Types plugin.
     /// </summary>
-    public class CachedEntityType : CachedEntity
+    internal class EntityTypesOptions
     {
-        /// <summary>
-        /// The full class name of the entity.
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// The fully qualified class name and assembly information.
-        /// </summary>
-        public string QualifiedName { get; private set; }
-
-        /// <summary>
-        /// Updates the cached information from the entity.
-        /// </summary>
-        /// <param name="entity">The database entity.</param>
-        public override void UpdateFromEntity( IEntity entity )
-        {
-            base.UpdateFromEntity( entity );
-
-            var entityType = ( EntityType ) entity;
-
-            Name = entityType.Name;
-            QualifiedName = entityType.QualifiedName;
-        }
     }
 }

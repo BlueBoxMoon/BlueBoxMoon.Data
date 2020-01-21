@@ -1,13 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.1" />
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Cache\BlueBoxMoon.Data.EntityFramework.Cache.csproj" />
   </ItemGroup>
 </Project>

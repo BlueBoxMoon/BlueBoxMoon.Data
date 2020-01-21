@@ -22,8 +22,8 @@
 //
 using System;
 
-using BlueBoxMoon.Data.EntityFramework.Common.EntityTypes;
-using BlueBoxMoon.Data.EntityFramework.Common.EntityTypes.Internals;
+using BlueBoxMoon.Data.EntityFramework.EntityTypes;
+using BlueBoxMoon.Data.EntityFramework.EntityTypes.Internals;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {

@@ -23,11 +23,11 @@
 using System;
 using System.Collections.Generic;
 
-using BlueBoxMoon.Data.EntityFramework.Common.Cache.Internals;
+using BlueBoxMoon.Data.EntityFramework.Cache.Internals;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+namespace BlueBoxMoon.Data.EntityFramework.Cache
 {
     /// <summary>
     /// Defines the requirements of the Entity Cache plugin.

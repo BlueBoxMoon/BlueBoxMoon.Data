@@ -20,33 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
 
-namespace BlueBoxMoon.Data.EntityFramework.Common.Cache
+namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
 {
     /// <summary>
-    /// The base cached entity object.
+    /// Defines an entity that will be recorded in the database.
     /// </summary>
-    public class CachedEntity : ICachedEntity
+    [Table( "EntityTypes", Schema = EntityTypesPlugin.Schema )]
+    [Guid( "bcaa4196-9fda-45c1-88da-7cf920a7a0fb" )]
+    public class EntityType : Entity
     {
         /// <summary>
-        /// The unique identifier of the entity.
+        /// The full class name of the entity.
         /// </summary>
-        public long Id { get; private set; }
-
-        /// <summary>
-        /// The globally unique identifier of the entity.
-        /// </summary>
-        public Guid Guid { get; private set; }
-
-        /// <summary>
-        /// Updates the cached information from the entity.
-        /// </summary>
-        /// <param name="entity">The database entity.</param>
-        public virtual void UpdateFromEntity( IEntity entity )
+        [Required]
+        [MaxLength( 100 )]
+        public string Name
         {
-            Id = entity.Id;
-            Guid = entity.Guid;
+            get => ( string ) GetValue();
+            set => SetValue( value );
+        }
+
+        /// <summary>
+        /// The fully qualified class name and assembly information.
+        /// </summary>
+        [Required]
+        [MaxLength( 250 )]
+        public string QualifiedName
+        {
+            get => ( string ) GetValue();
+            set => SetValue( value );
         }
     }
 }
