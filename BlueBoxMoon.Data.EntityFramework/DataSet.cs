@@ -171,6 +171,17 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
+        /// Creates a new instance of the given entity type but does not yet
+        /// attach it to the data set.
+        /// </summary>
+        /// <param name="constructorArguments">Arguments to pass to the entity type constructor.</param>
+        /// <returns>An instance, or proxy instance, of <typeparamref name="T"/>.</returns>
+        public virtual T Create( params object[] constructorArguments )
+        {
+            return Context.CreateProxy<T>( constructorArguments );
+        }
+
+        /// <summary>
         /// Removes the specified entity from the data set.
         /// </summary>
         /// <param name="entity">The entity.</param>

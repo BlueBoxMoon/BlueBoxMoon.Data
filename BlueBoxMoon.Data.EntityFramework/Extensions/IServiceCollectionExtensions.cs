@@ -32,7 +32,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
-    public static class DbContextOptionsBuilderExtensions
+    public static class IServiceCollectionExtensions
     {
         /// <summary>
         /// Configures the database context to use <see cref="EntityDbContext"/> options.
@@ -58,6 +58,7 @@ namespace BlueBoxMoon.Data.EntityFramework
                 ( ( IDbContextOptionsBuilderInfrastructure ) optionsBuilder ).AddOrUpdateExtension( extension );
 
                 optionsBuilder.ReplaceService<IMigrationsAssembly, EntityMigrationsAssembly>();
+                optionsBuilder.UseLazyLoadingProxies();
 
                 optionsAction?.Invoke( optionsBuilder );
                 entityOptionsAction?.Invoke( extension.Builder );
