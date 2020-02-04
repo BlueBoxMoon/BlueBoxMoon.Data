@@ -23,8 +23,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using BlueBoxMoon.Data.EntityFramework.Internals;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -286,45 +284,5 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         }
 
         #endregion
-
-        #region Classes
-
-        /// <summary>
-        /// Defines the structure of the Plugin migration tracking table.
-        /// </summary>
-        /// <seealso cref="Microsoft.EntityFrameworkCore.Migrations.HistoryRow" />
-        private class PluginHistoryRow : HistoryRow
-        {
-            #region Properties
-
-            /// <summary>
-            /// Gets the plugin identifier.
-            /// </summary>
-            /// <value>
-            /// The plugin identifier.
-            /// </value>
-            public string Plugin { get; }
-
-            #endregion
-
-            #region Constructors
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="PluginHistoryRow"/> class.
-            /// </summary>
-            /// <param name="plugin">The plugin identifier.</param>
-            /// <param name="migrationId">The migration identifier.</param>
-            /// <param name="productVersion">The product version.</param>
-            public PluginHistoryRow( string plugin, string migrationId, string productVersion )
-                : base( migrationId, productVersion )
-            {
-                Plugin = plugin;
-            }
-
-            #endregion
-        }
-
-        #endregion
     }
-
 }
