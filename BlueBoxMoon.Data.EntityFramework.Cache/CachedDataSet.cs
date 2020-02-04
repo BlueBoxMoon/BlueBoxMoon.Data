@@ -44,7 +44,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Cache
     {
         #region Fields
 
-        private IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
 
         #endregion
 
@@ -183,6 +183,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Cache
                 else
                 {
                     cached.UpdateFromEntity( entity );
+                }
+
+                if ( state == EntityState.Added )
+                {
+                    _cache.Remove( GetAllCacheKey() );
                 }
             }
         }

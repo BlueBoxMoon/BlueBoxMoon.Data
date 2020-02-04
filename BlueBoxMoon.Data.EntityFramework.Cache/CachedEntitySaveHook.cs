@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -73,14 +72,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Cache
                     var cachedType = _options.CachedTypesByEntity[entry.Key.GetType()].CachedType;
                     var set = entityDbContext.GetCachedDataSet( cachedType );
 
-                    if ( entry.Value == EntityState.Deleted )
-                    {
-                        set.Remove( entry.Key.Id );
-                    }
-                    else
-                    {
-                        set.EntityChanged( entry.Key, entry.Value );
-                    }
+                    set.EntityChanged( entry.Key, entry.Value );
                 }
             }
         }
