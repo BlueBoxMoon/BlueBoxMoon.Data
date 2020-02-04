@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using BlueBoxMoon.Data.EntityFramework;
+using BlueBoxMoon.Data.EntityFramework.Facets;
 using BlueBoxMoon.Data.EntityFramework.Cache;
 using BlueBoxMoon.Data.EntityFramework.EntityTypes;
 using BlueBoxMoon.Data.EntityFramework.Infrastructure;
@@ -36,6 +37,7 @@ namespace Console.Runner
                         cacheOptions.WithCachedType<Person, CachedPerson>();
                     } );
                     entityOptions.UseEntityTypes();
+                    entityOptions.UseFacets();
                 } );
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -54,6 +56,29 @@ namespace Console.Runner
             var c2 = ctx.GetCachedDataSet<CachedPerson>().GetById( 1 );
 
             var ctxFactory = serviceProvider.GetService<IDbContextFactory<DatabaseContext>>();
+
+            using ( var ctx2 = ctxFactory.CreateContext() )
+            {
+                var attrSet = ctx2.GetDataSet<Facet>();
+                if ( attrSet.GetById( 1 ) == null )
+                {
+                    var attr = attrSet.Create();
+                    attr.EntityTypeId = ctx2.GetCachedDataSet<CachedEntityType>().GetByType<Person>().Id;
+                    attr.Name = "Gender";
+                    attr.Key = "Gender";
+                    attr.Description = "The gender of the person.";
+                    attr.DefaultValue = "Unknown";
+                    attrSet.Add( attr );
+                    ctx2.SaveChanges();
+                }
+
+                var p2 = ctx2.GetDataSet<Person>().GetById( 1 );
+                p2.LoadFacetValues( ctx2 );
+                var v = p2.GetFacetValue( "Gender" );
+                p2.SetFacetValue( "Gender", "Male" );
+                p2.SaveFacetValues( ctx2 );
+            }
+
             using ( var ctx2 = ctxFactory.CreateContext() )
             {
                 var p2 = ctx2.GetDataSet<Person>().GetById( 1 );

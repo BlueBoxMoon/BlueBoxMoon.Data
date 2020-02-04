@@ -16,6 +16,7 @@
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Cache\BlueBoxMoon.Data.EntityFramework.Cache.csproj" />
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.EntityTypes\BlueBoxMoon.Data.EntityFramework.EntityTypes.csproj" />
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.Facets\BlueBoxMoon.Data.EntityFramework.Facets.csproj" />
   </ItemGroup>
 
 </Project>

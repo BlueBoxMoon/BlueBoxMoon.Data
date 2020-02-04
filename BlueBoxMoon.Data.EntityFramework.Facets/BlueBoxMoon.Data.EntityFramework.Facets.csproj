@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework.EntityTypes\BlueBoxMoon.Data.EntityFramework.EntityTypes.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.1" />
+    <PackageReference Include="BlueBoxMoon.Linqson" Version="0.8.0-alpha0011" />
+  </ItemGroup>
+</Project>

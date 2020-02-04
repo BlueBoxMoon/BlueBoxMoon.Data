@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFram
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFramework.EntityTypes", "BlueBoxMoon.Data.EntityFramework.EntityTypes\BlueBoxMoon.Data.EntityFramework.EntityTypes.csproj", "{39CF6722-44E7-435A-B9E8-69E83409400B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBoxMoon.Data.EntityFramework.Facets", "BlueBoxMoon.Data.EntityFramework.Facets\BlueBoxMoon.Data.EntityFramework.Facets.csproj", "{8D6FFB9B-6E07-463C-8F54-6CA26B684BE6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{39CF6722-44E7-435A-B9E8-69E83409400B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39CF6722-44E7-435A-B9E8-69E83409400B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39CF6722-44E7-435A-B9E8-69E83409400B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D6FFB9B-6E07-463C-8F54-6CA26B684BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D6FFB9B-6E07-463C-8F54-6CA26B684BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D6FFB9B-6E07-463C-8F54-6CA26B684BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D6FFB9B-6E07-463C-8F54-6CA26B684BE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
