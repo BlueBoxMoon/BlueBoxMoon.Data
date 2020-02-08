@@ -4,7 +4,7 @@ trigger:
 
 variables:
   BuildConfiguration: 'release'
-  Projects: '**/*.csproj;!*/Console.Runner.csproj'
+  Projects: '**/*.csproj'
   TestsProjects: '**/*.Tests.csproj'
   PackProjects: '**/*.csproj;!**/*.Tests.csproj;!*/Console.Runner.csproj'
 
