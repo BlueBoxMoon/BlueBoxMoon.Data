@@ -4,9 +4,9 @@ trigger:
 
 variables:
   BuildConfiguration: 'release'
-  Projects: '**/*.csproj;!**/Console.Runner.csproj'
+  Projects: '**/*.csproj;!*/Console.Runner.csproj'
   TestsProjects: '**/*.Tests.csproj'
-  PackProjects: '**/*.csproj;!**/*.Tests.csproj;!**/Console.Runner.csproj'
+  PackProjects: '**/*.csproj;!**/*.Tests.csproj;!*/Console.Runner.csproj'
 
 pool:
   vmImage: 'ubuntu-latest'
