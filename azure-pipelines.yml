@@ -4,7 +4,9 @@ trigger:
 
 variables:
   BuildConfiguration: 'release'
-  PackProjects: '**/*.csproj;!**/*.Tests.csproj'
+  Projects: '**/*.csproj;!**/Console.Runner.csproj'
+  TestsProjects: '**/*.Tests.csproj'
+  PackProjects: '**/*.csproj;!**/*.Tests.csproj;!**/Console.Runner.csproj'
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -26,7 +28,7 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Build'
   inputs:
-    projects: '**/*.csproj'
+    projects: '$(Projects)'
     arguments: '--configuration $(BuildConfiguration) /p:Version=$(GitVersion.NuGetVersion)'
     versioningScheme: byBuildNumber
 
@@ -34,7 +36,7 @@ steps:
   displayName: 'Run Tests'
   inputs:
     command: test
-    projects: '**/*.Tests.csproj'
+    projects: '$(TestsProjects)'
     arguments: '/p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)\TestResults\Coverage\coverage.cobertura.xml'
 
 - task: PublishCodeCoverageResults@1
@@ -57,9 +59,9 @@ steps:
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
-- task: NuGetCommand@2
-  inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'external'
-    publishFeedCredentials: 'NuGet.org'
+#- task: NuGetCommand@2
+#  inputs:
+#    command: 'push'
+#    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+#    nuGetFeedType: 'external'
+#    publishFeedCredentials: 'NuGet.org'
