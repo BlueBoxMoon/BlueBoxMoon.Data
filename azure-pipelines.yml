@@ -4,7 +4,7 @@ trigger:
 
 variables:
   BuildConfiguration: 'release'
-  Projects: '**/*.csproj'
+  Projects: '**/*.csproj;!*/Console.Runner.csproj'
   TestsProjects: '**/*.Tests.csproj'
   PackProjects: '**/*.csproj;!**/*.Tests.csproj;!*/Console.Runner.csproj'
 
@@ -59,9 +59,9 @@ steps:
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
-#- task: NuGetCommand@2
-#  inputs:
-#    command: 'push'
-#    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-#    nuGetFeedType: 'external'
-#    publishFeedCredentials: 'NuGet.org'
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'NuGet.org'
