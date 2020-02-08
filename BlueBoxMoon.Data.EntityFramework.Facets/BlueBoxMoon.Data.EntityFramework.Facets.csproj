@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Daniel Hazelbaker</Authors>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageLicenseUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework/blob/master/LICENSE</PackageLicenseUrl>
+    <Owners>Daniel Hazelbaker</Owners>
+    <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
+    <ReleaseVersion>0.5</ReleaseVersion>
+    <Description>Allows for adding custom key/value pairs to existing entity types for the BlueBoxMoon.Data.EntityFramework package. This can be done without having to modify the database schema of the entity you are adding facets to.</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,11 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Daniel Hazelbaker</Authors>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageLicenseUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework/blob/master/LICENSE</PackageLicenseUrl>
+    <Owners>Daniel Hazelbaker</Owners>
+    <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
+    <ReleaseVersion>0.5</ReleaseVersion>
+    <Description>Adds the ability to cache Entity objects in memory to the BlueBoxMoon.Data.EntityFramework package.</Description>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Class1.cs" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
   </ItemGroup>

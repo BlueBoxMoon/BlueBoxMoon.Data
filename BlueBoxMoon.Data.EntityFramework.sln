@@ -51,4 +51,7 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2498358B-416D-4A08-ADEF-BBB74510BB17}
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		version = 0.5
+	EndGlobalSection
 EndGlobal
