@@ -61,6 +61,10 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
         #region Tests
 
+        /// <summary>
+        /// Verifies that migrations are being executed in the correct order
+        /// when a migration depends on another plugin.
+        /// </summary>
         [Test]
         public void ValidDependencyOrder()
         {
@@ -99,6 +103,10 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
             Assert.AreEqual( expectedMigrations, migrations );
         }
 
+        /// <summary>
+        /// Verifies that the <see cref="DependencyException"/> error is
+        /// thrown when an unmet dependency exists.
+        /// </summary>
         [Test]
         public void UnmetDependency()
         {
