@@ -31,13 +31,15 @@ namespace BlueBoxMoon.Data.EntityFramework.EntityTypes.Migrations
     {
         protected override void Up( MigrationBuilder migrationBuilder )
         {
-            migrationBuilder.CreateEntityTable( "EntityTypes",
+            migrationBuilder.EnsureSchema( typeof( EntityType ).GetSchemaNameForEntity() );
+
+            migrationBuilder.CreateEntityTable( typeof( EntityType ).GetTableNameForEntity(),
                 table => new
                 {
                     Name = table.Column<string>( nullable: false, maxLength: 100 ),
                     QualifiedName = table.Column<string>( nullable: false, maxLength: 250 )
                 },
-                EntityTypesPlugin.Schema,
+                typeof( EntityType ).GetSchemaNameForEntity(),
                 table =>
                 {
                     table.UniqueConstraint( "IX_EntityTypes_Name", a => a.Name );
@@ -47,7 +49,7 @@ namespace BlueBoxMoon.Data.EntityFramework.EntityTypes.Migrations
 
         protected override void Down( MigrationBuilder migrationBuilder )
         {
-            migrationBuilder.DropTable( "EntityTypes", EntityTypesPlugin.Schema );
+            migrationBuilder.DropTable( typeof( EntityType ).GetTableNameForEntity(), typeof( EntityType ).GetSchemaNameForEntity() );
         }
     }
 }

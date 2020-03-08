@@ -30,6 +30,9 @@ namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
 {
     public class EntityTypesPlugin : EntityPlugin
     {
+        /// <summary>
+        /// The schema used by this plugin.
+        /// </summary>
         internal const string Schema = "EntityTypes";
 
         /// <summary>

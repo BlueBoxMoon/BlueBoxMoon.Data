@@ -32,6 +32,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Facets.Migrations
     {
         protected override void Up( MigrationBuilder migrationBuilder )
         {
+            migrationBuilder.EnsureSchema( typeof( Facet ).GetSchemaNameForEntity() );
+
             //
             // Create the Facet table.
             //
