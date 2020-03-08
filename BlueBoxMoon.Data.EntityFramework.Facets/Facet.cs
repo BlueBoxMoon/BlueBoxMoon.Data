@@ -21,7 +21,6 @@
 // SOFTWARE.
 //
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -30,6 +29,9 @@ using System.Runtime.InteropServices;
 
 using BlueBoxMoon.Data.EntityFramework.EntityTypes;
 using BlueBoxMoon.Linqson;
+
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework.Facets
 {
@@ -40,6 +42,12 @@ namespace BlueBoxMoon.Data.EntityFramework.Facets
     [Guid( "be3d011a-ddd2-4c27-9a48-45583f1ba846" )]
     public class Facet : Entity
     {
+        #region Fields
+
+        private Delegate _qualifierDelegate;
+
+        #endregion
+
         #region Database Properties
 
         /// <summary>
@@ -92,7 +100,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Facets
         public string Qualifiers
         {
             get => ( string ) GetValue();
-            set => SetValue( value );
+            set
+            {
+                SetValue( value );
+                _qualifierDelegate = null;
+            }
         }
 
         /// <summary>
@@ -133,9 +145,25 @@ namespace BlueBoxMoon.Data.EntityFramework.Facets
         public void SetQualifiers<TEntity>( Expression<Func<TEntity, bool>> predicate )
             where TEntity : IEntity
         {
-            var encodedExpression = EncodedExpression.EncodeExpression( predicate );
+            var serializer = DbContext?.GetService<IJsonSerializer>();
 
-            // TODO: Serialize and store in this.Qualifiers
+            if ( serializer == null )
+            {
+                throw new NotSupportedException( "Could not find an IJsonSerializer to use." );
+            }
+
+            if ( predicate != null )
+            {
+                var encodedExpression = EncodedExpression.EncodeExpression( predicate );
+
+                Qualifiers = serializer.Serialize( encodedExpression );
+                _qualifierDelegate = predicate.Compile();
+            }
+            else
+            {
+                Qualifiers = null;
+                _qualifierDelegate = null;
+            }
         }
 
         /// <summary>
@@ -155,13 +183,23 @@ namespace BlueBoxMoon.Data.EntityFramework.Facets
         /// <returns>A function or <c>null</c>.</returns>
         public Delegate GetQualifiers()
         {
-            return null;
-            // TODO: Deserialize from this.Qualifiers
-            //var encodedExpression = ( EncodedExpression ) null;
+            if ( _qualifierDelegate == null && !string.IsNullOrWhiteSpace( Qualifiers ) )
+            {
+                var serializer = DbContext?.GetInfrastructure().GetService<IJsonSerializer>();
 
-            //var expression = ( LambdaExpression ) EncodedExpression.DecodeExpression( encodedExpression );
+                if ( serializer == null )
+                {
+                    throw new NotSupportedException( "Could not find an IJsonSerializer to use." );
+                }
 
-            //return expression.Compile();
+                var encodedExpression = serializer.Deserialize<EncodedExpression>( Qualifiers );
+
+                var expression = ( LambdaExpression ) EncodedExpression.DecodeExpression( encodedExpression );
+
+                _qualifierDelegate = expression.Compile();
+            }
+
+            return _qualifierDelegate;
         }
 
         #endregion

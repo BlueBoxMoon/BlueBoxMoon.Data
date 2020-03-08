@@ -24,6 +24,7 @@ namespace Console.Runner
         {
             var serviceCollection = new ServiceCollection()
                 .AddLogging( a => a.AddConsole() )
+                .AddSingleton<IJsonSerializer, JsonSerializer>()
                 .AddEntityDbContext<DatabaseContext>( options =>
                 {
                     options.UseSqlite( "Data Source=database.db" );
@@ -68,6 +69,7 @@ namespace Console.Runner
                     attr.Key = "Gender";
                     attr.Description = "The gender of the person.";
                     attr.DefaultValue = "Unknown";
+                    attr.SetQualifiers<Person>( a => a.FirstName == "Daniel" );
                     attrSet.Add( attr );
                     ctx2.SaveChanges();
                 }
@@ -114,6 +116,19 @@ namespace Console.Runner
         protected override void Down( MigrationBuilder migrationBuilder )
         {
             migrationBuilder.DropTable( "TestPlugin" );
+        }
+    }
+
+    public class JsonSerializer : IJsonSerializer
+    {
+        public T Deserialize<T>( string json )
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<T>( json );
+        }
+
+        public string Serialize( object value )
+        {
+            return System.Text.Json.JsonSerializer.Serialize( value );
         }
     }
 }
