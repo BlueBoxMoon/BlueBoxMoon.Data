@@ -319,7 +319,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
 
                 if ( dependsOn.Any( a => a == null ) )
                 {
-                    throw new Exception( $"Unmet dependency found for migration '{node.MigrationId}' on plugin '{node.Plugin.Name}'." );
+                    throw new DependencyException( node.Plugin.Name, node.MigrationId, $"A required dependency was not found." );
                 }
 
                 node.Dependencies.AddRange( dependsOn );
