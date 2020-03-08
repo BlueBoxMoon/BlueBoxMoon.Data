@@ -61,6 +61,14 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         protected IMigrationsAssembly MigrationsAssembly { get; }
 
         /// <summary>
+        /// Gets the database creator.
+        /// </summary>
+        /// <value>
+        /// The database creator.
+        /// </value>
+        protected IRelationalDatabaseCreator DatabaseCreator { get; }
+
+        /// <summary>
         /// Gets the plugin history repository.
         /// </summary>
         /// <value>
@@ -141,18 +149,20 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// </summary>
         /// <param name="migrationsSqlGenerator">The migrations SQL generator.</param>
         /// <param name="migrationsAssembly">The migrations assembly.</param>
+        /// <param name="databaseCreator">The database creator.</param>
         /// <param name="pluginHistoryRepository">The plugin history repository.</param>
         /// <param name="rawSqlCommandBuilder">The raw SQL command builder.</param>
         /// <param name="migrationCommandExecutor">The migration command executor.</param>
         /// <param name="connection">The connection.</param>
         /// <param name="sqlGenerationHelper">The SQL generation helper.</param>
         /// <param name="currentContext">The current context.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="commandLogger">The command logger.</param>
         /// <param name="databaseProvider">The database provider.</param>
         public PluginMigrator(
             IMigrationsSqlGenerator migrationsSqlGenerator,
             IMigrationsAssembly migrationsAssembly,
+            IDatabaseCreator databaseCreator,
             IPluginHistoryRepository pluginHistoryRepository,
             IRawSqlCommandBuilder rawSqlCommandBuilder,
             IMigrationCommandExecutor migrationCommandExecutor,
@@ -165,6 +175,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         {
             MigrationsSqlGenerator = migrationsSqlGenerator;
             MigrationsAssembly = migrationsAssembly;
+            DatabaseCreator = ( IRelationalDatabaseCreator ) databaseCreator;
             PluginHistoryRepository = pluginHistoryRepository;
             RawSqlCommandBuilder = rawSqlCommandBuilder;
             MigrationCommandExecutor = migrationCommandExecutor;
@@ -181,6 +192,29 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         #region Methods
 
         /// <summary>
+        /// Ensures the database and plugin history repository exist.
+        /// </summary>
+        protected virtual void EnsureExists()
+        {
+            //
+            // Verify the history table exists and if not create it.
+            //
+            if ( !PluginHistoryRepository.Exists() )
+            {
+                if ( !DatabaseCreator.Exists() )
+                {
+                    DatabaseCreator.Create();
+                }
+
+                var command = RawSqlCommandBuilder.Build( PluginHistoryRepository.GetCreateScript() );
+
+                var query = new RelationalCommandParameterObject( Connection, null, null, CurrentContext.Context, CommandLogger );
+
+                command.ExecuteNonQuery( query );
+            }
+        }
+
+        /// <summary>
         /// Initiates a migration operation to the target migration version.
         /// </summary>
         /// <param name="plugin">The plugin whose migrations should be run.</param>
@@ -189,17 +223,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         {
             Logger.LogInformation( LoggingEvents.MigratingId, LoggingEvents.Migrating, plugin.Identifier, Connection.DbConnection.Database, Connection.DbConnection.DataSource );
 
-            //
-            // Verify the history table exists and if not create it.
-            //
-            if ( !PluginHistoryRepository.Exists() )
-            {
-                var command = RawSqlCommandBuilder.Build( PluginHistoryRepository.GetCreateScript() );
-
-                var query = new RelationalCommandParameterObject( Connection, null, null, CurrentContext.Context, CommandLogger );
-
-                command.ExecuteNonQuery( query );
-            }
+            EnsureExists();
 
             //
             // Get all the command lists to be executed.
@@ -215,6 +239,103 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             foreach ( var commandList in commandLists )
             {
                 MigrationCommandExecutor.ExecuteNonQuery( commandList(), Connection );
+            }
+        }
+
+        /// <summary>
+        /// Initiates a migration operation of the plugins to the latest versions.
+        /// </summary>
+        /// <param name="plugin">The plugins whose migrations should be run.</param>
+        public void Migrate( IEnumerable<EntityPlugin> plugins )
+        {
+            foreach ( var plugin in plugins )
+            {
+                Logger.LogInformation( LoggingEvents.MigratingId, LoggingEvents.Migrating, plugin.Identifier, Connection.DbConnection.Database, Connection.DbConnection.DataSource );
+            }
+
+            EnsureExists();
+
+            var migrationNodes = new List<MigrationNode>();
+            var appliedMigrations = new List<string>();
+
+            foreach ( var plugin in plugins )
+            {
+                var appliedMigrationEntries = PluginHistoryRepository.GetAppliedMigrations( plugin );
+
+                appliedMigrations.AddRange( appliedMigrationEntries
+                    .Select( a => $"{plugin.Identifier}-{a.MigrationId}" ) );
+
+                //
+                // Identify all the migration classes and the migrations to be applied.
+                //
+                PopulateMigrations(
+                    plugin,
+                    appliedMigrationEntries.Select( t => t.MigrationId ),
+                    null,
+                    out var migrationsToApply,
+                    out var migrationsToRevert,
+                    out var actualTargetMigration );
+
+                var nodes = migrationsToApply.Select( migration =>
+                    {
+                        var migrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>().Id;
+                        Logger.LogInformation( LoggingEvents.ApplyingMigrationId, LoggingEvents.ApplyingMigration, migrationId, plugin.Identifier );
+
+                        return new MigrationNode( plugin, migration, GenerateUpSql( plugin, migration ) );
+                    } )
+                    .OrderBy( a => a.MigrationId )
+                    .ToList();
+
+                //
+                // Set a dependency on each migration, skipping the first one.
+                //
+                for ( int i = 1; i < nodes.Count; i++ )
+                {
+                    nodes[i].Dependencies.Add( nodes[i - 1] );
+                }
+
+                migrationNodes.AddRange( nodes );
+            }
+
+            //
+            // Add all inter-plugin dependencies.
+            //
+            foreach ( var node in migrationNodes )
+            {
+                //
+                // Find dependencies for other plugins.
+                //
+                var dependsOn = node.Migration
+                    .GetType()
+                    .GetCustomAttributes<DependsOnPluginAttribute>()
+                    .Select( b => new
+                    {
+                        ( ( EntityPlugin ) Activator.CreateInstance( b.PluginType ) ).Identifier,
+                        b.MigrationId
+                    } )
+                    .Where( b => !appliedMigrations.Contains( $"{b.Identifier}-{b.MigrationId}" ) )
+                    .Select( b => migrationNodes.FirstOrDefault( c => c.Plugin.Identifier == b.Identifier && c.MigrationId == b.MigrationId ) )
+                    .ToList();
+
+                if ( dependsOn.Any( a => a == null ) )
+                {
+                    throw new Exception( $"Unmet dependency found for migration '{node.MigrationId}' on plugin '{node.Plugin.Name}'." );
+                }
+
+                node.Dependencies.AddRange( dependsOn );
+            }
+
+            //
+            // Sort migrations taking into account dependencies.
+            //
+            migrationNodes = migrationNodes.TopologicalSort( a => a.Dependencies ).ToList();
+
+            //
+            // Execute each command list in order.
+            //
+            foreach ( var commandList in migrationNodes.Select( a => a.Commands ) )
+            {
+                MigrationCommandExecutor.ExecuteNonQuery( commandList, Connection );
             }
         }
 
@@ -414,6 +535,63 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         }
 
         #endregion
-    }
 
+        #region Support Classes
+
+        /// <summary>
+        /// Helps with dependency tracking for migrations.
+        /// </summary>
+        protected class MigrationNode
+        {
+            #region Properties
+
+            /// <summary>
+            /// Gets the plugin for this node.
+            /// </summary>
+            public EntityPlugin Plugin { get; }
+
+            /// <summary>
+            /// Gets the migration identifier for this node.
+            /// </summary>
+            public string MigrationId { get; }
+
+            /// <summary>
+            /// Gets the migration for this node.
+            /// </summary>
+            public Migration Migration { get; }
+
+            /// <summary>
+            /// Gets the commands for this node.
+            /// </summary>
+            public IReadOnlyList<MigrationCommand> Commands { get; }
+
+            /// <summary>
+            /// Gets the dependencies for this node.
+            /// </summary>
+            public List<MigrationNode> Dependencies { get; }
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            /// Creates a new instance of the <see cref="MigrationNode"/> class.
+            /// </summary>
+            /// <param name="plugin">The plugin for this node.</param>
+            /// <param name="migration">The migration for this node.</param>
+            /// <param name="commands">The commands for this node.</param>
+            public MigrationNode( EntityPlugin plugin, Migration migration, IReadOnlyList<MigrationCommand> commands )
+            {
+                Plugin = plugin;
+                Migration = migration;
+                Commands = commands;
+                MigrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>().Id;
+                Dependencies = new List<MigrationNode>();
+            }
+
+            #endregion
+        }
+
+        #endregion
+    }
 }

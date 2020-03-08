@@ -54,6 +54,13 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         IReadOnlyList<HistoryRow> GetAppliedMigrations( EntityPlugin plugin );
 
         /// <summary>
+        /// Gets the applied migrations for all plugins.
+        /// </summary>
+        /// <param name="plugin">The plugin.</param>
+        /// <returns>A read only list of <see cref="PluginHistoryRow"/> objects that represent which migrations have been run.</returns>
+        IReadOnlyList<PluginHistoryRow> GetAppliedMigrations();
+
+        /// <summary>
         /// Gets the SQL script to be executed in order to save the <see cref="HistoryRow"/>
         /// to the database.
         /// </summary>

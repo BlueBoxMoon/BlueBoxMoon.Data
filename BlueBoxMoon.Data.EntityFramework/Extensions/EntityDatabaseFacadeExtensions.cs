@@ -56,10 +56,7 @@ namespace BlueBoxMoon.Data.EntityFramework
             var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
             var context = ( EntityDbContext ) currentContext.Context;
 
-            foreach ( var plugin in context.EntityContextOptions.Plugins )
-            {
-                migrator.Migrate( plugin );
-            }
+            migrator.Migrate( context.EntityContextOptions.Plugins );
         }
 
         /// <summary>

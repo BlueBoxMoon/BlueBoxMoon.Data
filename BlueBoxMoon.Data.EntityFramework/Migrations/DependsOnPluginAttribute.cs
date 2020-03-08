@@ -20,27 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using System.Collections.Generic;
+using System;
 
 namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
     /// <summary>
-    /// Provides functionality to migrate a plugin from the current
-    /// version to another version.
+    /// Indicates a dependency on another plugins migration before this
+    /// migration can run.
     /// </summary>
-    public interface IPluginMigrator
+    [AttributeUsage( AttributeTargets.Class, AllowMultiple = true )]
+    public class DependsOnPluginAttribute : Attribute
     {
-        /// <summary>
-        /// Initiates a migration operation to the target migration version.
-        /// </summary>
-        /// <param name="plugin">The plugin whose migrations should be run.</param>
-        /// <param name="targetMigration">The target migration.</param>
-        void Migrate( EntityPlugin plugin, string targetMigration = null );
+        #region Properties
 
         /// <summary>
-        /// Initiates a migration operation of the plugins to the latest versions.
+        /// The plugin class type the migration depends on.
         /// </summary>
-        /// <param name="plugin">The plugins whose migrations should be run.</param>
-        void Migrate( IEnumerable<EntityPlugin> plugins );
+        public Type PluginType { get; }
+
+        /// <summary>
+        /// The migration identifier in the plugin the migration depends on.
+        /// </summary>
+        public string MigrationId { get; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="DependsOnPluginAttribute"/> class.
+        /// </summary>
+        /// <param name="pluginType">The type of plugin to indicate a dependency on.</param>
+        /// <param name="migrationId">The identifier of the migration that must be run first.</param>
+        public DependsOnPluginAttribute( Type pluginType, string migrationId )
+        {
+            PluginType = pluginType;
+            MigrationId = migrationId;
+        }
+
+        #endregion
     }
 }

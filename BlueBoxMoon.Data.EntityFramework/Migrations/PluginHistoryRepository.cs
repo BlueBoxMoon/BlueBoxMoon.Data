@@ -196,6 +196,30 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         }
 
         /// <summary>
+        /// Gets the SQL query to execute in order to find all the migrations.
+        /// </summary>
+        /// <returns>A string containing the SQL statement.</returns>
+        /// <remarks>The query should return two columns, MigrationId and ProductVersion.</remarks>
+        protected virtual string GetAppliedMigrationsSql()
+        {
+            var stringTypeMapping = Dependencies.TypeMappingSource.GetMapping( typeof( string ) );
+
+            var migrationIdColumn = Dependencies.SqlGenerationHelper
+                .DelimitIdentifier( nameof( PluginHistoryRow.MigrationId ) );
+
+            var productVersionColumn = Dependencies.SqlGenerationHelper
+                .DelimitIdentifier( nameof( PluginHistoryRow.ProductVersion ) );
+
+            var pluginColumn = Dependencies.SqlGenerationHelper
+                .DelimitIdentifier( nameof( PluginHistoryRow.Plugin ) );
+
+            var tableName = Dependencies.SqlGenerationHelper
+                .DelimitIdentifier( TableName );
+
+            return $"SELECT {pluginColumn}, {migrationIdColumn}, {productVersionColumn} FROM {tableName}";
+        }
+
+        /// <summary>
         /// Gets the applied migrations for the specified plugin.
         /// </summary>
         /// <param name="plugin">The plugin.</param>
@@ -216,6 +240,33 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                     while ( reader.Read() )
                     {
                         rows.Add( new HistoryRow( reader.DbDataReader.GetString( 0 ), reader.DbDataReader.GetString( 1 ) ) );
+                    }
+                }
+            }
+
+            return rows;
+        }
+
+        /// <summary>
+        /// Gets the applied migrations for all plugins.
+        /// </summary>
+        /// <returns>
+        /// A read only list of <see cref="HistoryRow" /> objects that represent which migrations have been run.
+        /// </returns>
+        public IReadOnlyList<PluginHistoryRow> GetAppliedMigrations()
+        {
+            var rows = new List<PluginHistoryRow>();
+
+            if ( Exists() )
+            {
+                var command = Dependencies.RawSqlCommandBuilder
+                    .Build( GetAppliedMigrationsSql() );
+
+                using ( var reader = command.ExecuteReader( GetParameterObject() ) )
+                {
+                    while ( reader.Read() )
+                    {
+                        rows.Add( new PluginHistoryRow( reader.DbDataReader.GetString( 0 ), reader.DbDataReader.GetString( 1 ), reader.DbDataReader.GetString( 2 ) ) );
                     }
                 }
             }
