@@ -33,6 +33,8 @@ namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
     [Guid( "bcaa4196-9fda-45c1-88da-7cf920a7a0fb" )]
     public class EntityType : Entity
     {
+        #region Properties
+
         /// <summary>
         /// The full class name of the entity.
         /// </summary>
@@ -54,5 +56,7 @@ namespace BlueBoxMoon.Data.EntityFramework.EntityTypes
             get => ( string ) GetValue();
             set => SetValue( value );
         }
+
+        #endregion
     }
 }

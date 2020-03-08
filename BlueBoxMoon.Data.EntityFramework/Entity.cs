@@ -24,11 +24,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 using FluentValidation;
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace BlueBoxMoon.Data.EntityFramework
 {
@@ -57,6 +62,11 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// </summary>
         private Dictionary<Type, object> _extensions = new Dictionary<Type, object>();
 
+        /// <summary>
+        /// Backing store that holds the <see cref="EntityDbContext"/> for this entity.
+        /// </summary>
+        private EntityDbContext _dbContext;
+
         #endregion
 
         #region Events
@@ -68,7 +78,7 @@ namespace BlueBoxMoon.Data.EntityFramework
 
         #endregion
 
-        #region Properties
+        #region Entity Properties
 
         /// <summary>
         /// The unique identifier of the entity.
@@ -89,6 +99,39 @@ namespace BlueBoxMoon.Data.EntityFramework
         {
             get => ( Guid ) GetValue();
             set => SetValue( value );
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the database context this entity is associated with.
+        /// </summary>
+        [IgnoreDataMember]
+        [NotMapped]
+        public EntityDbContext DbContext
+        {
+            get
+            {
+                if ( _dbContext == null )
+                {
+                    var lazyLoader = ( ILazyLoader ) GetType().GetProperties()
+                        .FirstOrDefault( a => a.PropertyType == typeof( ILazyLoader ) )
+                        ?.GetValue( this );
+                    
+                    if ( lazyLoader != null )
+                    {
+                        var getDbContext = lazyLoader.GetType()
+                            .GetProperty( "Context", BindingFlags.Instance | BindingFlags.NonPublic );
+
+                        _dbContext = getDbContext?.GetValue( lazyLoader ) as EntityDbContext;
+                    }
+                }
+
+                return _dbContext;
+            }
+            set => _dbContext = value;
         }
 
         #endregion

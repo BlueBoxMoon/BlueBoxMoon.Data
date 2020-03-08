@@ -38,5 +38,10 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// The globally unique identifier of the entity.
         /// </summary>
         Guid Guid { get; set; }
+
+        /// <summary>
+        /// Gets the database context this entity is associated with.
+        /// </summary>
+        EntityDbContext DbContext { get; set; }
     }
 }
