@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ReleaseVersion>0.5</ReleaseVersion>
+    <RootNamespace>BlueBoxMoon.Data.EntityFramework.PostgreSQL</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlueBoxMoon.Data.EntityFramework\BlueBoxMoon.Data.EntityFramework.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.1" />
+  </ItemGroup>
+</Project>

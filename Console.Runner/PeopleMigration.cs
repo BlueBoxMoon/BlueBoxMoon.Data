@@ -13,17 +13,23 @@ namespace Console.Runner
     {
         protected override void Up( MigrationBuilder migrationBuilder )
         {
-            migrationBuilder.CreateEntityTable( "People",
-                table => new
+            migrationBuilder.EnsureSchema( typeof( Person ).GetSchemaNameForEntity() );
+
+            migrationBuilder.CreateEntityTable(
+                name: typeof( Person ).GetTableNameForEntity(),
+                columns: table => new
                 {
                     FirstName = table.Column<string>( nullable: false, maxLength: 100 ),
                     LastName = table.Column<string>( nullable: false, maxLength: 100 )
-                }, "testSchema" );
+                },
+                schema: typeof( Person  ).GetSchemaNameForEntity() );
         }
 
         protected override void Down( MigrationBuilder migrationBuilder )
         {
-            migrationBuilder.DropTable( "People" );
+            migrationBuilder.DropTable(
+                name: typeof( Person ).GetTableNameForEntity(),
+                schema: typeof( Person ).GetSchemaNameForEntity() );
         }
     }
 }

@@ -20,17 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using System.Text;
+
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace BlueBoxMoon.Data.EntityFramework.Sqlite
+namespace BlueBoxMoon.Data.EntityFramework.PostgreSQL
 {
     /// <summary>
-    /// The Sqlite <see cref="PluginHistoryRepository"/> implementation.
+    /// The Postgresql <see cref="PluginHistoryRepository"/> implementation.
     /// </summary>
     /// <seealso cref="BlueBoxMoon.Data.EntityFramework.Migrations.PluginHistoryRepository" />
-    public class SqlitePluginHistoryRepository : PluginHistoryRepository
+    public class NpgsqlPluginHistoryRepository : PluginHistoryRepository
     {
         #region Properties
 
@@ -44,20 +46,18 @@ namespace BlueBoxMoon.Data.EntityFramework.Sqlite
         {
             get
             {
+                var builder = new StringBuilder();
+
+                builder.Append( "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE " );
+
                 var stringTypeMapping = Dependencies.TypeMappingSource.GetMapping( typeof( string ) );
 
-                var sqliteMaster = Dependencies.SqlGenerationHelper
-                    .DelimitIdentifier( "sqlite_master" );
-                
-                var nameColumn = Dependencies.SqlGenerationHelper
-                    .DelimitIdentifier( "name" );
+                builder
+                    .Append( "c.relname=" )
+                    .Append( stringTypeMapping.GenerateSqlLiteral( TableName ) )
+                    .Append( ");" );
 
-                var typeColumn = Dependencies.SqlGenerationHelper
-                    .DelimitIdentifier( "type" );
-
-                var tableName = stringTypeMapping.GenerateSqlLiteral( TableName );
-
-                return $"SELECT COUNT(*) FROM {sqliteMaster} WHERE {nameColumn} = {tableName} AND {typeColumn} = 'table';";
+                return builder.ToString();
             }
         }
 
@@ -66,10 +66,10 @@ namespace BlueBoxMoon.Data.EntityFramework.Sqlite
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlitePluginHistoryRepository"/> class.
+        /// Initializes a new instance of the <see cref="PostgresqlPluginHistoryRepository"/> class.
         /// </summary>
         /// <param name="dependencies">The dependencies.</param>
-        public SqlitePluginHistoryRepository( PluginHistoryRepositoryDependencies dependencies )
+        public NpgsqlPluginHistoryRepository( PluginHistoryRepositoryDependencies dependencies )
             : base( dependencies )
         {
         }
@@ -87,7 +87,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Sqlite
         /// </returns>
         protected override bool InterpretExistsResult( object value )
         {
-            return ( long ) value != 0;
+            return ( bool ) value;
         }
 
         #endregion
