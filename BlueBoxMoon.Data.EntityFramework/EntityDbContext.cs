@@ -164,6 +164,10 @@ namespace BlueBoxMoon.Data.EntityFramework
             //
             // Call plugin OnModelCreating(this, modelBuilder) methods.
             //
+            foreach ( var plugin in EntityContextOptions.Plugins )
+            {
+                plugin.OnModelCreating( modelBuilder );
+            }
         }
 
         /// <summary>
