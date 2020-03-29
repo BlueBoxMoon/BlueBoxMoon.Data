@@ -62,7 +62,9 @@ namespace BlueBoxMoon.Data.EntityFramework
                 table => new
                 {
                     Id = table.Column<long>( nullable: false ).AutoIncrement( migrationBuilder ),
-                    Guid = table.Column<Guid>( nullable: false )
+                    Guid = table.Column<Guid>( nullable: false ),
+                    CreatedDateTime = table.Column<DateTime>( nullable: false ),
+                    ModifiedDateTime = table.Column<DateTime>( nullable: false )
                 }, table =>
                 {
                     table.PrimaryKey( $"PK_{createTableOperation.Name}", a => a.Id );
