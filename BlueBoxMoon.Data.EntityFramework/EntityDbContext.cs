@@ -28,8 +28,6 @@ using System.Threading.Tasks;
 
 using BlueBoxMoon.Data.EntityFramework.Internals;
 
-using FluentValidation;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -305,19 +303,26 @@ namespace BlueBoxMoon.Data.EntityFramework
 
             foreach ( var entity in entities )
             {
-                var validator = entity.GetValidator();
+                var result = entity.Validate();
 
-                if ( validator == null )
+                if ( result == null || result.IsValid )
                 {
                     continue;
                 }
 
-                var result = validator.Validate( entity );
+                string message;
 
-                if ( !result.IsValid )
+                if ( entity is Entity )
                 {
-                    exceptions.Add( new ValidationException( result.Errors ) );
+                    message = $"The {entity.GetType().Name} entity {( ( Entity ) entity ).Guid} failed validation.";
                 }
+                else
+                {
+                    message = $"The {entity.GetType().Name} entity failed validation.";
+                }
+
+                var exception = new AggregateException( message, result.Errors.Select( a => new ValidationException( a ) ) );
+                exceptions.Add( exception );
             }
 
             if ( exceptions.Any() )

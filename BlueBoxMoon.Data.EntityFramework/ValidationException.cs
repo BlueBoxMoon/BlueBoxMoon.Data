@@ -20,20 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace BlueBoxMoon.Data.EntityFramework
 {
     /// <summary>
-    /// Defines the basic requirements of an entity that supports pre-save
-    /// validation.
+    /// An exception used to indicate a single validation error.
     /// </summary>
-    public interface IEntityValidation
+    public class ValidationException : AggregateException
     {
+        #region Properties
+
         /// <summary>
-        /// Validates the entity and checks if it can be saved.
+        /// The name of the property related to the error message.
         /// </summary>
-        /// <returns>
-        /// A <see cref="ValidationResult"/> instance.
-        /// </returns>
-        ValidationResult Validate();
+        public string PropertyName { get; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ValidationException"/> class.
+        /// </summary>
+        /// <param name="error">The validation error for this exception.</param>
+        public ValidationException( ValidationError error )
+            : base( error.Message )
+        {
+            PropertyName = error.PropertyName;
+        }
+
+        #endregion
     }
 }

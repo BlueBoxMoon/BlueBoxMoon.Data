@@ -23,17 +23,38 @@
 namespace BlueBoxMoon.Data.EntityFramework
 {
     /// <summary>
-    /// Defines the basic requirements of an entity that supports pre-save
-    /// validation.
+    /// A single error that describes a validation error.
     /// </summary>
-    public interface IEntityValidation
+    public class ValidationError
     {
+        #region Properties
+
         /// <summary>
-        /// Validates the entity and checks if it can be saved.
+        /// The name of the property that was considered invalid. May be
+        /// <c>null</c> if a single property was not the cause of the error.
         /// </summary>
-        /// <returns>
-        /// A <see cref="ValidationResult"/> instance.
-        /// </returns>
-        ValidationResult Validate();
+        public string PropertyName { get; }
+
+        /// <summary>
+        /// User friendly message describing the nature of the error.
+        /// </summary>
+        public string Message { get; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ValidationError"/> class.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that the error is related to.</param>
+        /// <param name="message">The message describing the error.</param>
+        public ValidationError( string propertyName, string message )
+        {
+            PropertyName = propertyName;
+            Message = message;
+        }
+
+        #endregion
     }
 }

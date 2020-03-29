@@ -30,8 +30,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
-using FluentValidation;
-
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
@@ -48,19 +46,14 @@ namespace BlueBoxMoon.Data.EntityFramework
         #region Fields
 
         /// <summary>
-        /// The validator to use for this type.
-        /// </summary>
-        private static readonly IValidator _validator = new EntityValidator();
-
-        /// <summary>
         /// Backing store that holds property values.
         /// </summary>
-        private Dictionary<string, object> _properties = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
 
         /// <summary>
         /// Backing store that holds all extension objects.
         /// </summary>
-        private Dictionary<Type, object> _extensions = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> _extensions = new Dictionary<Type, object>();
 
         /// <summary>
         /// Backing store that holds the <see cref="EntityDbContext"/> for this entity.
@@ -193,15 +186,21 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
-        /// Gets the validator that will validate this instance.
+        /// Validates the entity prior to being saved. If any property values
+        /// are in a state that prevents it from being saved they should be
+        /// indicated in the result.
         /// </summary>
-        /// <returns>
-        /// An <see cref="IValidator"/> instance or null if no validation
-        /// needs to be performed.
-        /// </returns>
-        public virtual IValidator GetValidator()
+        /// <returns>A <see cref="ValidationResult"/> that identifies any validation errors.</returns>
+        public virtual ValidationResult Validate()
         {
-            return _validator;
+            var result = new ValidationResult();
+
+            if ( Guid == Guid.Empty )
+            {
+                result.AddError( new ValidationError( nameof( Guid ), "Invalid unique identifier." ) );
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -292,24 +291,6 @@ namespace BlueBoxMoon.Data.EntityFramework
             where TExtension : class
         {
             _extensions[typeof( TExtension )] = extension;
-        }
-
-        #endregion
-
-        #region Validator
-
-        /// <summary>
-        /// Provides basic validation of an <see cref="Entity"/> object.
-        /// </summary>
-        private class EntityValidator : AbstractValidator<Entity>
-        {
-            /// <summary>
-            /// Creates a new instance of the <see cref="EntityValidator"/> class.
-            /// </summary>
-            public EntityValidator()
-            {
-                RuleFor( a => a.Guid ).NotEmpty();
-            }
         }
 
         #endregion
