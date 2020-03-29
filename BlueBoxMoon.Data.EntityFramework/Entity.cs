@@ -98,9 +98,9 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// The timestamp that this entity was initially created.
         /// </summary>
         [Required]
-        public DateTime CreatedDateTime
+        public DateTimeOffset CreatedDateTime
         {
-            get => ( DateTime ) GetValue();
+            get => ( DateTimeOffset ) GetValue();
             set => SetValue( value );
         }
 
@@ -108,9 +108,9 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// The timestamp that this entity was last modified.
         /// </summary>
         [Required]
-        public DateTime ModifiedDateTime
+        public DateTimeOffset ModifiedDateTime
         {
-            get => ( DateTime ) GetValue();
+            get => ( DateTimeOffset ) GetValue();
             set => SetValue( value );
         }
 
@@ -157,7 +157,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         public Entity()
         {
             Guid = Guid.NewGuid();
-            CreatedDateTime = ModifiedDateTime = DateTime.Now;
+            CreatedDateTime = ModifiedDateTime = DateTimeOffset.Now;
         }
 
         #endregion
@@ -171,7 +171,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <param name="entry">The Entity Framework entry about this instance.</param>
         public virtual void PreSaveChanges( EntityDbContext dbContext, EntityEntry entry )
         {
-            ModifiedDateTime = DateTime.Now;
+            ModifiedDateTime = DateTimeOffset.Now;
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace Console.Runner
                 .AddEntityDbContext<DatabaseContext>( options =>
                 {
                     options.UseSqlite( "Data Source=database.db" );
+                    options.EnableSensitiveDataLogging();
                 }, entityOptions =>
                 {
                     entityOptions.UseSqlite();
@@ -84,6 +85,9 @@ namespace Console.Runner
 
             using ( var ctx2 = ctxFactory.CreateContext() )
             {
+                var d = new DateTimeOffset( new DateTime( 2020, 3, 29, 11, 4, 0, DateTimeKind.Local ) );
+                var x = ctx2.GetDataSet<Person>().Where( a => a.CreatedDateTime >= d ).ToList();
+                var y = ctx2.GetDataSet<Person>().Where( a => a.CreatedDateTime < d ).ToList();
                 var p2 = ctx2.GetDataSet<Person>().GetById( 1 );
                 p2.LastName = Guid.NewGuid().ToString();
                 ctx2.SaveChanges();
