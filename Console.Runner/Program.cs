@@ -21,6 +21,8 @@ namespace Console.Runner
 {
     class Program
     {
+        protected static bool useNpgsql = true;
+
         static void Main( string[] args )
         {
             var serviceCollection = new ServiceCollection()
@@ -28,11 +30,26 @@ namespace Console.Runner
                 .AddSingleton<IJsonSerializer, JsonSerializer>()
                 .AddEntityDbContext<DatabaseContext>( options =>
                 {
-                    options.UseSqlite( "Data Source=database.db" );
+                    if ( useNpgsql )
+                    {
+                        options.UseNpgsql( "Host=localhost; Database=bbmef_test" );
+                    }
+                    else
+                    {
+                        options.UseSqlite( "Data Source=database.db" );
+                    }
                     options.EnableSensitiveDataLogging();
                 }, entityOptions =>
                 {
-                    entityOptions.UseSqlite();
+                    if ( useNpgsql )
+                    {
+                        entityOptions.UseNpgsql();
+                    }
+                    else
+                    {
+                        entityOptions.UseSqlite();
+                    }
+
                     entityOptions.WithPlugin<TestPlugin>();
                     entityOptions.WithEntity<Person, PersonDataSet>();
                     entityOptions.UseEntityCache( cacheOptions =>
@@ -85,7 +102,7 @@ namespace Console.Runner
 
             using ( var ctx2 = ctxFactory.CreateContext() )
             {
-                var d = new DateTimeOffset( new DateTime( 2020, 3, 29, 11, 4, 0, DateTimeKind.Local ) );
+                var d = new DateTimeOffset( new DateTime( 2020, 3, 29, 12, 9, 0, DateTimeKind.Local ) );
                 var x = ctx2.GetDataSet<Person>().Where( a => a.CreatedDateTime >= d ).ToList();
                 var y = ctx2.GetDataSet<Person>().Where( a => a.CreatedDateTime < d ).ToList();
                 var p2 = ctx2.GetDataSet<Person>().GetById( 1 );
