@@ -24,11 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using BlueBoxMoon.Data.EntityFramework.Facets.Internals;
 using BlueBoxMoon.Data.EntityFramework.Cache;
 using BlueBoxMoon.Data.EntityFramework.EntityTypes;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace BlueBoxMoon.Data.EntityFramework.Facets
 {

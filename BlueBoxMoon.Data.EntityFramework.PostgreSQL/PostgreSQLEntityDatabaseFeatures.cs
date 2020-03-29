@@ -24,7 +24,6 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
 
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata.Internal;
 
 namespace BlueBoxMoon.Data.EntityFramework.PostgreSQL
 {
@@ -36,7 +35,7 @@ namespace BlueBoxMoon.Data.EntityFramework.PostgreSQL
         /// <param name="operation">The operation.</param>
         public void AutoIncrementColumn( OperationBuilder<AddColumnOperation> operation )
         {
-            operation.Annotation( NpgsqlAnnotationNames.ValueGenerationStrategy, NpgsqlValueGenerationStrategy.SerialColumn );
+            operation.Annotation( "Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn );
         }
     }
 }
