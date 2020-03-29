@@ -104,7 +104,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
 
             services.AddScoped<IPluginMigrator, PluginMigrator>()
                 .AddScoped<PluginHistoryRepositoryDependencies>()
-                .AddSingleton( typeof( IEntityDatabaseFeatures ), Builder.EntityDatabaseFeaturesType );
+                .AddSingleton( typeof( IEntityDatabaseFeatures ), Builder.Options.Provider.Features );
 
             var contextType = Builder.BaseOptionsBuilder.Options.ContextType;
             services.AddSingleton( typeof( IDbContextFactory<> ).MakeGenericType( contextType ), typeof( DbContextFactory<> ).MakeGenericType( contextType ) );
@@ -131,7 +131,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// <param name="options"> The options being validated. </param>
         public void Validate( IDbContextOptions options )
         {
-            if ( Builder.EntityDatabaseFeaturesType == null )
+            if ( Builder.Options.Provider == null )
             {
                 throw new Exception( "Database provider has not been fully configured." );
             }

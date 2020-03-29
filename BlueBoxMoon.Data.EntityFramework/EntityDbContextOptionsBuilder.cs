@@ -22,6 +22,7 @@
 //
 using System;
 using System.Collections.Generic;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +43,7 @@ namespace BlueBoxMoon.Data.EntityFramework
         {
             get
             {
-                if ( EntityDatabaseFeaturesType == null )
+                if ( _options.Provider == null )
                 {
                     throw new Exception( "Database provider has not been configured." );
                 }
@@ -55,12 +56,6 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// The base options builder.
         /// </summary>
         public DbContextOptionsBuilder BaseOptionsBuilder { get; }
-
-        /// <summary>
-        /// The type that will provide services unique to each database
-        /// provider.
-        /// </summary>
-        internal Type EntityDatabaseFeaturesType { get; set; }
 
         /// <summary>
         /// Gets the apply service actions.
@@ -125,15 +120,14 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
-        /// Sets the database provider features type that will provide
-        /// database-specific functionality.
+        /// Specifies the database provider to be used.
         /// </summary>
-        /// <typeparam name="T">A type that implements <see cref="IEntityDatabaseFeatures"/>.</typeparam>
+        /// <typeparam name="TProvider">The provider to be used.</typeparam>
         /// <returns>An <see cref="EntityDbContextOptionsBuilder"/> that can be used to further configure options.</returns>
-        public EntityDbContextOptionsBuilder UseDatabaseProviderFeatures<T>()
-            where T : IEntityDatabaseFeatures
+        public EntityDbContextOptionsBuilder UseDatabaseProvider<TProvider>()
+            where TProvider : EntityDatabaseProvider, new()
         {
-            EntityDatabaseFeaturesType = typeof( T );
+            _options.Provider = new TProvider();
 
             return this;
         }

@@ -20,26 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using BlueBoxMoon.Data.EntityFramework.Migrations;
-
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BlueBoxMoon.Data.EntityFramework.PostgreSQL
 {
-    public static class EntityDbContextOptionsBuilderExtensions
+    /// <summary>
+    /// Contains the properties and methods used to interact with a PostgreSQL
+    /// database.
+    /// </summary>
+    internal class NpgsqlEntityDatabaseProvider : EntityDatabaseProvider
     {
         /// <summary>
-        /// Configures the entity database to use the Npgsql provider.
+        /// Retrieves the required database features provider.
         /// </summary>
-        /// <param name="optionsBuilder">The entity options builder.</param>
-        /// <returns>The entity options builder.</returns>
-        public static EntityDbContextOptionsBuilder UseNpgsql( this EntityDbContextOptionsBuilder optionsBuilder )
-        {
-            return optionsBuilder.UseDatabaseProvider<NpgsqlEntityDatabaseProvider>()
-                .ApplyServices( services =>
-                {
-                    services.AddScoped<IPluginHistoryRepository, NpgsqlPluginHistoryRepository>();
-                } );
-        }
+        public override IEntityDatabaseFeatures Features { get; } = new NpgsqlEntityDatabaseFeatures();
     }
 }

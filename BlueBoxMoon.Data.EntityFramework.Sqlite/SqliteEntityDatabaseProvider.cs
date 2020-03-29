@@ -20,26 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-using BlueBoxMoon.Data.EntityFramework.Migrations;
+using System;
 
-using Microsoft.Extensions.DependencyInjection;
+using BlueBoxMoon.Data.EntityFramework;
 
-namespace BlueBoxMoon.Data.EntityFramework.PostgreSQL
+using Microsoft.EntityFrameworkCore;
+
+namespace BlueBoxMoon.Data.EntityFramework.Sqlite
 {
-    public static class EntityDbContextOptionsBuilderExtensions
+    /// <summary>
+    /// Contains the properties and methods used to interact with a SQLite
+    /// database.
+    /// </summary>
+    internal class SqliteEntityDatabaseProvider : EntityDatabaseProvider
     {
         /// <summary>
-        /// Configures the entity database to use the Npgsql provider.
+        /// Retrieves the required database features provider.
         /// </summary>
-        /// <param name="optionsBuilder">The entity options builder.</param>
-        /// <returns>The entity options builder.</returns>
-        public static EntityDbContextOptionsBuilder UseNpgsql( this EntityDbContextOptionsBuilder optionsBuilder )
+        public override IEntityDatabaseFeatures Features { get; } = new SqliteEntityDatabaseFeatures();
+
+        /// <summary>
+        /// Called when the EntityDbContext needs to create it's model.
+        /// </summary>
+        /// <param name="modelBuilder">The instance that handles building the model.</param>
+        public override void OnModelCreating( ModelBuilder modelBuilder )
         {
-            return optionsBuilder.UseDatabaseProvider<NpgsqlEntityDatabaseProvider>()
-                .ApplyServices( services =>
-                {
-                    services.AddScoped<IPluginHistoryRepository, NpgsqlPluginHistoryRepository>();
-                } );
+            base.OnModelCreating( modelBuilder );
+
+            modelBuilder.UseValueConverterForPropertyType<DateTimeOffset>( new DateTimeOffsetValueConverter() );
+            modelBuilder.UseValueConverterForPropertyType<DateTimeOffset?>( new DateTimeOffsetValueConverter() );
         }
     }
 }

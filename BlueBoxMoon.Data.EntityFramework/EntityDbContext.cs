@@ -153,6 +153,11 @@ namespace BlueBoxMoon.Data.EntityFramework
             }
 
             //
+            // Allow database providers to apply any custom default configuration.
+            //
+            EntityContextOptions.Provider.OnModelCreating( modelBuilder );
+
+            //
             // Apply any configurations from assemblies containing
             // registered types.
             //

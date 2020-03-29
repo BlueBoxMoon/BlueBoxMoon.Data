@@ -54,6 +54,14 @@ namespace BlueBoxMoon.Data.EntityFramework
         public IReadOnlyDictionary<Type, EntitySettings> RegisteredEntities { get; } = new Dictionary<Type, EntitySettings>();
 
         /// <summary>
+        /// Gets the entity database provider.
+        /// </summary>
+        /// <value>
+        /// The entity database provider.
+        /// </value>
+        public EntityDatabaseProvider Provider { get; internal set; }
+
+        /// <summary>
         /// Gets the registered plugins.
         /// </summary>
         /// <value>

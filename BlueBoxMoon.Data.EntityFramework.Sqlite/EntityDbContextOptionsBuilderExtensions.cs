@@ -36,61 +36,13 @@ namespace BlueBoxMoon.Data.EntityFramework.Sqlite
         /// <returns></returns>
         public static EntityDbContextOptionsBuilder UseSqlite( this EntityDbContextOptionsBuilder optionsBuilder )
         {
-            //optionsBuilder.BaseOptionsBuilder.ReplaceService<IMigrationsSqlGenerator, SqliteEntityMigrationsSqlGenerator>();
             optionsBuilder.BaseOptionsBuilder.ReplaceService<ISqlGenerationHelper, SqliteEntitySqlGenerationHelper>();
 
-            return optionsBuilder.UseDatabaseProviderFeatures<SqliteEntityDatabaseFeatures>()
+            return optionsBuilder.UseDatabaseProvider<SqliteEntityDatabaseProvider>()
                 .ApplyServices( services =>
                 {
                     services.AddScoped<IPluginHistoryRepository, SqlitePluginHistoryRepository>();
                 } );
         }
     }
-
-    //public class SqliteEntityMigrationsSqlGenerator : SqliteMigrationsSqlGenerator
-    //{
-    //    public SqliteEntityMigrationsSqlGenerator( MigrationsSqlGeneratorDependencies dependencies, IMigrationsAnnotationProvider migrationsAnnotations )
-    //        : base( dependencies, migrationsAnnotations )
-    //    {
-    //    }
-
-    //    public override IReadOnlyList<MigrationCommand> Generate( IReadOnlyList<MigrationOperation> operations, IModel model = null )
-    //    {
-    //        foreach ( var operation in operations )
-    //        {
-    //            //if ( operation is CreateTableOperation createTableOperation && createTableOperation.Schema != null )
-    //            //{
-    //            //    createTableOperation.Name = $"{createTableOperation.Schema}_{createTableOperation.Name}";
-    //            //}
-    //        }
-    //        // AddColumnOperation
-    //        // AddForeignKeyOperation
-    //        // AddPrimaryKeyOperation
-    //        // AddUniqueConstraintOperation
-    //        // AlterColumnOperation
-    //        // AlterSequenceOperation
-    //        // AlterTableOperation
-    //        // CreateCheckConstraintOperation
-    //        // CreateIndexOperation
-    //        // CreateSequenceOperation
-    //        // DeleteDataOperation
-    //        // DropCheckConstraintOperation
-    //        // DropColumnOperation
-    //        // DropForeignKeyOperation
-    //        // DropIndexOperation
-    //        // DropPrimaryKeyOperation
-    //        // DropSequenceOperation
-    //        // DropTableOperation
-    //        // DropUniqueConstraintOperation
-    //        // InsertDataOperation
-    //        // RenameColumnOperation
-    //        // RenameIndexOperation
-    //        // RenameSequenceOperation
-    //        // RenameTableOperation
-    //        // RestartSequenceOperation
-    //        // UpdateDataOperation
-
-    //        return base.Generate( operations, model );
-    //    }
-    //}
 }
