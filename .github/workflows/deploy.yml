@@ -34,4 +34,4 @@ jobs:
         name: nupkg
         path: ./*/bin/Release/*.nupkg
     - name: Publish NuGet packages
-      run: dotnet nuget push -k ${{ secrets.NUGETKEY }} ./*/bin/Release/*.nupkg
+      run: dotnet nuget push --api-key ${{ secrets.NUGETKEY }} --source https://api.nuget.org/v3/index.json ./*/bin/Release/*.nupkg
