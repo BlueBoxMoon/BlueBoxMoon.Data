@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Daniel Hazelbaker</Authors>
     <Copyright>Copyright © 2020</Copyright>
-    <PackageLicenseUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Owners>Daniel Hazelbaker</Owners>
     <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
     <ReleaseVersion>0.5</ReleaseVersion>

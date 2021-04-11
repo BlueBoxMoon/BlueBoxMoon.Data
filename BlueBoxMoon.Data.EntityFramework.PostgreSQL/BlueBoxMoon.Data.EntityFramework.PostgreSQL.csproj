@@ -4,7 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <ReleaseVersion>0.5</ReleaseVersion>
     <RootNamespace>BlueBoxMoon.Data.EntityFramework.PostgreSQL</RootNamespace>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>0.6.0</Version>
+    <Authors>Daniel Hazelbaker</Authors>
+    <Description>The PostgreSQL database provider for BlueBoxMoon.Data.EntityFramework package.</Description>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
