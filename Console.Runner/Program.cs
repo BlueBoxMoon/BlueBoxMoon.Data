@@ -65,7 +65,7 @@ namespace Console.Runner
             var ctx = serviceProvider.GetService<DatabaseContext>();
             ctx.Database.Migrate();
 
-            ctx.Database.MigratePlugins();
+            ctx.Database.InstallPlugins();
             ctx.Database.InitializePlugins();
 
             var peopleSet = ctx.GetDataSet<Person>();
@@ -123,7 +123,7 @@ namespace Console.Runner
         }
     }
 
-    [Migration( "20200112_Initial" )]
+    [PluginMigration( "1.0.0" )]
     public class TestMigration : EntityMigration
     {
         protected override void Up( MigrationBuilder migrationBuilder )

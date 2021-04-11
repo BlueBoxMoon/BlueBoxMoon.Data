@@ -25,55 +25,54 @@ using System;
 namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
     /// <summary>
-    /// Indicates a dependency on another plugins migration before this
-    /// migration can run.
+    /// Defines a single migration for a plugin by its version number
+    /// and step it should be executed in.
     /// </summary>
-    [AttributeUsage( AttributeTargets.Class, AllowMultiple = true )]
-    public class DependsOnPluginAttribute : Attribute
+    [AttributeUsage( AttributeTargets.Class, AllowMultiple = false )]
+    public class PluginMigrationAttribute : Attribute
     {
         #region Properties
 
         /// <summary>
-        /// The plugin class type the migration depends on.
-        /// </summary>
-        public Type PluginType { get; }
-
-        /// <summary>
-        /// The version number of the target plugin that the migration depends on.
+        /// The version number in major.minor[.build[.revision]] format. This
+        /// is the version number that this migration was introduced in.
         /// </summary>
         public Version Version { get; }
 
         /// <summary>
-        /// The migration step in the version the migration depends on.
+        /// The ordered step to execute the migration inside the specified
+        /// <see cref="Version"/>.
         /// </summary>
         public int Step { get; }
+
+        /// <summary>
+        /// The migration identifier to be written to the database.
+        /// </summary>
+        internal string MigrationId => $"{Version}-{Step}";
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Creates a new instance of the <see cref="DependsOnPluginAttribute"/> class.
+        /// Initializes a new instance of the <see cref="PluginMigrationAttribute"/> class
+        /// with a default <see cref="Step"/> value of 1.
         /// </summary>
-        /// <param name="pluginType">The type of plugin to indicate a dependency on.</param>
-        /// <param name="version">The version of the plugin that must first be installed.</param>
-        public DependsOnPluginAttribute( Type pluginType, string version )
-            : this( pluginType, version, int.MaxValue )
+        /// <param name="version">The version number this migration was introduced in.</param>
+        public PluginMigrationAttribute( string version )
+            : this( version, 1 )
         {
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="DependsOnPluginAttribute"/> class.
+        /// Initializes a new instance of the <see cref="PluginMigrationAttribute"/> class.
         /// </summary>
-        /// <param name="pluginType">The type of plugin to indicate a dependency on.</param>
-        /// <param name="version">The version of the plugin that must first be installed.</param>
-        /// <param name="step">The migration step in the version number that must first be installed.</param>
-        public DependsOnPluginAttribute( Type pluginType, string version, int step )
+        /// <param name="version">The version number this migration was introduced in.</param>
+        /// <param name="step">The ordered step to execute this migration in relation to the <paramref name="version"/>.</param>
+        public PluginMigrationAttribute( string version, int step )
         {
-            PluginType = pluginType;
             Version = new Version( version );
             Step = step;
-
 
             if ( Version.Build == -1 || Version.Revision == -1 )
             {

@@ -66,15 +66,15 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         /// when a migration depends on another plugin.
         /// </summary>
         [Test]
-        public void ValidDependencyOrder()
+        public void DependencyOrderIsValid()
         {
             var expectedMigrations = new List<string>
             {
-                "PluginC-1",
-                "PluginC-2",
-                "PluginB-1",
-                "PluginA-1",
-                "PluginA-2"
+                "PluginC-1.0.0.0-1",
+                "PluginC-2.0.0.0-1",
+                "PluginB-1.0.0.0-1",
+                "PluginA-1.0.0.0-1",
+                "PluginA-1.0.0.0-2"
             };
 
             var serviceCollection = new ServiceCollection()
@@ -93,7 +93,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
             var ctx = serviceProvider.GetService<TestContext>();
 
-            ctx.Database.MigratePlugins();
+            ctx.Database.InstallPlugins();
 
             var repo = ctx.GetService<IPluginHistoryRepository>();
             var migrations = repo.GetAppliedMigrations()
@@ -108,7 +108,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         /// thrown when an unmet dependency exists.
         /// </summary>
         [Test]
-        public void UnmetDependency()
+        public void UnmetDependencyThrowsError()
         {
             var serviceCollection = new ServiceCollection()
                 .AddEntityDbContext<TestContext>( options =>
@@ -125,7 +125,165 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
             var ctx = serviceProvider.GetService<TestContext>();
 
-            Assert.Throws<DependencyException>( ctx.Database.MigratePlugins );
+            Assert.Throws<DependencyException>( ctx.Database.InstallPlugins );
+        }
+
+        /// <summary>
+        /// Verifies that we can uninstall a plugin from the database.
+        /// </summary>
+        [Test]
+        public void CanRemoveSinglePlugin()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0.0-1",
+                "PluginC-2.0.0.0-1",
+                "PluginB-1.0.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginA>();
+                    entityOptions.WithPlugin<PluginB>();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            ctx.Database.InstallPlugins();
+
+            var pluginToRemove = ctx.Database.GetPlugins().Single( a => a.Name == "PluginA" );
+            ctx.Database.RemovePlugin( pluginToRemove );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        /// <summary>
+        /// Verifies that we can install a single plugin into the database.
+        /// </summary>
+        [Test]
+        public void CanInstallSinglePlugin()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0.0-1",
+                "PluginC-2.0.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
+            ctx.Database.InstallPlugin( pluginToInstall );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        /// <summary>
+        /// Verifies that we can install a single plugin into the database.
+        /// </summary>
+        [Test]
+        public void CanInstallSinglePluginToSpecificVersion()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( pluginToInstall, "1.0.0.0-1" );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        /// <summary>
+        /// Verifies that we can install a single plugin into the database.
+        /// </summary>
+        [Test]
+        public void CanDowngradeSinglePluginToSpecificVersion()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
+
+            ctx.Database.InstallPlugin( pluginToInstall );
+
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( pluginToInstall, "1.0.0.0-1" );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
         }
 
         #endregion
@@ -151,19 +309,27 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
                 return new Type[] { typeof( Migration1), typeof( Migration2 ) };
             }
 
-            [Migration( "1" )]
-            [DependsOnPlugin( typeof( PluginB ), "1" )]
+            [PluginMigration( "1.0.0" )]
+            [DependsOnPlugin( typeof( PluginB ), "1.0.0" )]
             public class Migration1 : EntityMigration
             {
                 protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
                 {
                 }
+
+                protected override void Down( MigrationBuilder migrationBuilder )
+                {
+                }
             }
 
-            [Migration( "2" )]
+            [PluginMigration( "1.0.0", 2 )]
             public class Migration2 : EntityMigration
             {
                 protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
+                {
+                }
+
+                protected override void Down( MigrationBuilder migrationBuilder )
                 {
                 }
             }
@@ -180,11 +346,15 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
                 return new Type[] { typeof( Migration1 ) };
             }
 
-            [Migration( "1" )]
-            [DependsOnPlugin( typeof( PluginC ), "2" )]
+            [PluginMigration( "1.0.0" )]
+            [DependsOnPlugin( typeof( PluginC ), "2.0", 1 )]
             public class Migration1 : EntityMigration
             {
                 protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
+                {
+                }
+
+                protected override void Down( MigrationBuilder migrationBuilder )
                 {
                 }
             }
@@ -201,18 +371,26 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
                 return new Type[] { typeof( Migration1 ), typeof( Migration2 ) };
             }
 
-            [Migration( "1" )]
+            [PluginMigration( "1.0.0" )]
             public class Migration1 : EntityMigration
             {
                 protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
                 {
                 }
+
+                protected override void Down( MigrationBuilder migrationBuilder )
+                {
+                }
             }
 
-            [Migration( "2" )]
+            [PluginMigration( "2.0.0" )]
             public class Migration2 : EntityMigration
             {
                 protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
+                {
+                }
+
+                protected override void Down( MigrationBuilder migrationBuilder )
                 {
                 }
             }

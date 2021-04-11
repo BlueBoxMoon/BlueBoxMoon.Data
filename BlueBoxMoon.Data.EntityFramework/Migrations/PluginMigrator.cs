@@ -245,10 +245,10 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <summary>
         /// Initiates a migration operation of the plugins to the latest versions.
         /// </summary>
-        /// <param name="plugin">The plugins whose migrations should be run.</param>
-        public void Migrate( IEnumerable<EntityPlugin> plugins )
+        /// <param name="pluginstoMigrate">The plugins whose migrations should be run.</param>
+        public void Migrate( IEnumerable<EntityPlugin> pluginsToMigrate )
         {
-            foreach ( var plugin in plugins )
+            foreach ( var plugin in pluginsToMigrate )
             {
                 Logger.LogInformation( LoggingEvents.MigratingId, LoggingEvents.Migrating, plugin.Identifier, Connection.DbConnection.Database, Connection.DbConnection.DataSource );
             }
@@ -258,7 +258,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             var migrationNodes = new List<MigrationNode>();
             var appliedMigrations = new List<string>();
 
-            foreach ( var plugin in plugins )
+            foreach ( var plugin in pluginsToMigrate )
             {
                 var appliedMigrationEntries = PluginHistoryRepository.GetAppliedMigrations( plugin );
 
@@ -270,7 +270,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 //
                 PopulateMigrations(
                     plugin,
-                    appliedMigrationEntries.Select( t => t.MigrationId ),
+                    appliedMigrationEntries.Select( t => t.MigrationId ).ToList(),
                     null,
                     out var migrationsToApply,
                     out var migrationsToRevert,
@@ -278,16 +278,17 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
 
                 var nodes = migrationsToApply.Select( migration =>
                     {
-                        var migrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>().Id;
+                        var migrationId = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
                         Logger.LogInformation( LoggingEvents.ApplyingMigrationId, LoggingEvents.ApplyingMigration, migrationId, plugin.Identifier );
 
                         return new MigrationNode( plugin, migration, GenerateUpSql( plugin, migration ) );
                     } )
-                    .OrderBy( a => a.MigrationId )
+                    .OrderBy( a => a.Version )
+                    .ThenBy( a => a.Step )
                     .ToList();
 
                 //
-                // Set a dependency on each migration, skipping the first one.
+                // Set a dependency on each migration to the prior migration, skipping the first one.
                 //
                 for ( int i = 1; i < nodes.Count; i++ )
                 {
@@ -310,16 +311,70 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                     .GetCustomAttributes<DependsOnPluginAttribute>()
                     .Select( b => new
                     {
-                        ( ( EntityPlugin ) Activator.CreateInstance( b.PluginType ) ).Identifier,
-                        b.MigrationId
+                        Plugin = ( EntityPlugin ) Activator.CreateInstance( b.PluginType ),
+                        b.Version,
+                        b.Step
                     } )
-                    .Where( b => !appliedMigrations.Contains( $"{b.Identifier}-{b.MigrationId}" ) )
-                    .Select( b => migrationNodes.FirstOrDefault( c => c.Plugin.Identifier == b.Identifier && c.MigrationId == b.MigrationId ) )
+                    .Where( b =>
+                    {
+                        var step = b.Step;
+
+                        if ( step == int.MaxValue )
+                        {
+                            //
+                            // Look for the last migration that would match the request. Look at
+                            // the target plugin's explicit plugin list because we may have been
+                            // requested to upgrade a plugin with a dependency that is not being
+                            // upgraded. We need to be able to determine if the prerequisite has
+                            // already been installed.
+                            //
+                            var targetMigration = b.Plugin.GetMigrations()
+                                .Select( c => c.GetCustomAttribute<PluginMigrationAttribute>() )
+                                .Where( c => c.Version <= b.Version )
+                                .FirstOrDefault();
+
+                            //
+                            // Test if the target plugin even has any migrations up until
+                            // the requested version. If not then skip this dependency.
+                            //
+                            if ( targetMigration == null )
+                            {
+                                return false;
+                            }
+
+                            //
+                            // targetMigration contains the migration that needs to exist
+                            // for this dependency to be met.
+                            //
+                            step = targetMigration.Step;
+                        }
+
+                        //
+                        // If the applied migrations already contains this required migration step
+                        // then we don't need to include it in our dependency check.
+                        //
+                        return !appliedMigrations.Contains( $"{b.Plugin.Identifier}-{b.Version}-{step}" );
+                    } )
+                    .Select( b =>
+                    {
+                        var step = b.Step;
+
+                        if ( step == int.MaxValue )
+                        {
+                            step = b.Plugin.GetMigrations()
+                                .Select( c => c.GetCustomAttribute<PluginMigrationAttribute>() )
+                                .Where( c => c.Version <= b.Version )
+                                .FirstOrDefault()
+                                .Step;
+                        }
+
+                        return migrationNodes.FirstOrDefault( pendingMigration => pendingMigration.Plugin.Identifier == b.Plugin.Identifier && pendingMigration.Version == b.Version && pendingMigration.Step == step );
+                    } )       
                     .ToList();
 
                 if ( dependsOn.Any( a => a == null ) )
                 {
-                    throw new DependencyException( node.Plugin.Name, node.MigrationId, $"A required dependency was not found." );
+                    throw new DependencyException( node.Plugin.Name, node.Version, node.Step, $"A required dependency was not found." );
                 }
 
                 node.Dependencies.AddRange( dependsOn );
@@ -373,7 +428,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 var index = i;
                 yield return () =>
                 {
-                    var migrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>().Id;
+                    var migrationId = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
                     Logger.LogInformation( LoggingEvents.RevertingMigrationId, LoggingEvents.RevertingMigration, migrationId, plugin.Identifier );
 
                     var previousMigration = index != migrationsToRevert.Count - 1 ? migrationsToRevert[index + 1] : actualTargetMigration;
@@ -390,7 +445,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             {
                 yield return () =>
                 {
-                    var migrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>().Id;
+                    var migrationId = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
                     Logger.LogInformation( LoggingEvents.ApplyingMigrationId, LoggingEvents.ApplyingMigration, migrationId, plugin.Identifier );
 
                     return GenerateUpSql( plugin, migration );
@@ -434,7 +489,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             //
             foreach ( var migration in migrations )
             {
-                var migrationId = migration.GetCustomAttribute<MigrationAttribute>().Id;
+                var migrationId = migration.GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
 
                 if ( appliedMigrationEntries.Contains( migrationId ) )
                 {
@@ -505,7 +560,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <returns></returns>
         protected virtual IReadOnlyList<MigrationCommand> GenerateUpSql( EntityPlugin plugin, Migration migration )
         {
-            var migrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>()?.Id;
+            var migrationId = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
             var historyRow = new HistoryRow( migrationId, ProductInfo.GetVersion() );
             var historyScript = PluginHistoryRepository.GetInsertScript( plugin, historyRow );
             var historyCommand = RawSqlCommandBuilder.Build( historyScript );
@@ -525,7 +580,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <returns></returns>
         protected virtual IReadOnlyList<MigrationCommand> GenerateDownSql( EntityPlugin plugin, Migration migration, Migration previousMigration )
         {
-            var historyScript = PluginHistoryRepository.GetDeleteScript( plugin, migration.GetType().GetCustomAttribute<MigrationAttribute>().Id );
+            var migrationId = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
+            var historyScript = PluginHistoryRepository.GetDeleteScript( plugin, migrationId );
             var historyCommand = RawSqlCommandBuilder.Build( historyScript );
 
             return MigrationsSqlGenerator
@@ -551,9 +607,14 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             public EntityPlugin Plugin { get; }
 
             /// <summary>
-            /// Gets the migration identifier for this node.
+            /// Gets the plugin version this migration is for.
             /// </summary>
-            public string MigrationId { get; }
+            public Version Version { get; }
+
+            /// <summary>
+            /// Gets the migration identifier inside the version of this node.
+            /// </summary>
+            public int Step { get; }
 
             /// <summary>
             /// Gets the migration for this node.
@@ -585,7 +646,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 Plugin = plugin;
                 Migration = migration;
                 Commands = commands;
-                MigrationId = migration.GetType().GetCustomAttribute<MigrationAttribute>().Id;
+                Version = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().Version;
+                Step = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().Step;
                 Dependencies = new List<MigrationNode>();
             }
 

@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
     <ReleaseVersion>0.5</ReleaseVersion>
     <Description>Adds the ability to cache Entity objects in memory to the BlueBoxMoon.Data.EntityFramework package.</Description>
+    <Version>0.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

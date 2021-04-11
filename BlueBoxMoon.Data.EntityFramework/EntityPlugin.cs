@@ -68,7 +68,7 @@ namespace BlueBoxMoon.Data.EntityFramework
                 .Assembly
                 .GetExportedTypes()
                 .Where( a => typeof( EntityMigration ).IsAssignableFrom( a ) )
-                .Where( a => a.GetCustomAttribute<MigrationAttribute>() !=  null )
+                .Where( a => a.GetCustomAttribute<PluginMigrationAttribute>() !=  null )
                 .ToList();
         }
 

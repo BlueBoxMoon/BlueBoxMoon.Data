@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
     <ReleaseVersion>0.5</ReleaseVersion>
     <Description>A set of classes to aid in rapid development of Entity Framework Core applications.</Description>
+    <Version>0.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

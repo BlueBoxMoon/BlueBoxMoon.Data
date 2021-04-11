@@ -21,6 +21,7 @@
 // SOFTWARE.
 //
 using System;
+using System.Collections.Generic;
 
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 
@@ -35,11 +36,25 @@ namespace BlueBoxMoon.Data.EntityFramework
     public static class EntityDatabaseFacadeExtensions
     {
         /// <summary>
-        /// Migrates a plugin to the latest version possible.
+        /// Gets a list of all <see cref="EntityPlugin"/> objects
+        /// registered with the system.
+        /// </summary>
+        /// <param name="databaseFacade">The database facade.</param>
+        /// <returns>An enumeration of all <see cref="EntityPlugin"/> objects.</returns>
+        public static IEnumerable<EntityPlugin> GetPlugins( this DatabaseFacade databaseFacade )
+        {
+            var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
+            var context = ( EntityDbContext ) currentContext.Context;
+
+            return context.EntityContextOptions.Plugins;
+        }
+
+        /// <summary>
+        /// Installs a plugin to the latest version possible.
         /// </summary>
         /// <param name="databaseFacade">The database facade.</param>
         /// <param name="plugin">The plugin to be migrated.</param>
-        public static void MigratePlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        public static void InstallPlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
         {
             var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
 
@@ -47,10 +62,23 @@ namespace BlueBoxMoon.Data.EntityFramework
         }
 
         /// <summary>
-        /// Migrates all plugins to the latest version possible.
+        /// Remove a single plugin from the database by running all of
+        /// its down migration steps until it is completely uninstalled.
         /// </summary>
         /// <param name="databaseFacade">The database facade.</param>
-        public static void MigratePlugins( this DatabaseFacade databaseFacade )
+        /// <param name="plugin">The plugin to be completely removed.</param>
+        public static void RemovePlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        {
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( plugin, Microsoft.EntityFrameworkCore.Migrations.Migration.InitialDatabase );
+        }
+
+        /// <summary>
+        /// Installs all plugins to the latest version possible.
+        /// </summary>
+        /// <param name="databaseFacade">The database facade.</param>
+        public static void InstallPlugins( this DatabaseFacade databaseFacade )
         {
             var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
             var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();

@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
+using System;
+
 using BlueBoxMoon.Data.EntityFramework.EntityTypes;
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 
@@ -27,7 +29,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BlueBoxMoon.Data.EntityFramework.Facets.Migrations
 {
-    [Migration( "202001191257")]
+    [PluginMigration( "0.5.0", 1 )]
     public class Initialize : EntityMigration
     {
         protected override void Up( MigrationBuilder migrationBuilder )

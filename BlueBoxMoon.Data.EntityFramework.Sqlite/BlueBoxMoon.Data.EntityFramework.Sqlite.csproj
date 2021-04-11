@@ -7,8 +7,9 @@
     <PackageLicenseUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework/blob/master/LICENSE</PackageLicenseUrl>
     <Owners>Daniel Hazelbaker</Owners>
     <PackageProjectUrl>https://github.com/BlueBoxMoon/BlueBoxMoon.Data.EntityFramework</PackageProjectUrl>
-    <ReleaseVersion>0.5</ReleaseVersion>
+    <ReleaseVersion>0.6.0</ReleaseVersion>
     <Description>The SQLite database provider for BlueBoxMoon.Data.EntityFramework package. This is not recommended for production use except under special situations due to limitations of schema changes supported by SQLite.</Description>
+    <Version>0.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

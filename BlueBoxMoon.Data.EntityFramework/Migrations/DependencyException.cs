@@ -34,12 +34,18 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <summary>
         /// The name of the plugin that had a dependency exception.
         /// </summary>
-        public string Plugin { get; set; }
+        public string Plugin { get; }
 
         /// <summary>
-        /// The migration identifier of the migration that had a dependency exception.
+        /// The version number of the migration that had a dependency exception.
         /// </summary>
-        public string Migration { get; set; }
+        public Version Version { get; }
+
+        /// <summary>
+        /// The specific migration step in the <see cref="Version"/> that had
+        /// a dependency exception.
+        /// </summary>
+        public int Step { get; }
 
         #endregion
 
@@ -49,13 +55,15 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// Creates a new instance of the <see cref="DependencyException"/> class.
         /// </summary>
         /// <param name="plugin">The name of the plugin.</param>
-        /// <param name="migration">The identifier of the migration.</param>
+        /// <param name="version">The version number of the migration.</param>
+        /// <param name="step">The specific migration step of the migration.</param>
         /// <param name="message">The message that describes what happened.</param>
-        public DependencyException( string plugin, string migration, string message )
+        public DependencyException( string plugin, Version version, int step, string message )
             : base( message )
         {
             Plugin = plugin;
-            Migration = migration;
+            Version = version;
+            Step = step;
         }
 
         #endregion

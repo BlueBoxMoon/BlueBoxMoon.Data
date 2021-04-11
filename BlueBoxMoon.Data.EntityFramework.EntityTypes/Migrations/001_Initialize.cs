@@ -26,7 +26,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BlueBoxMoon.Data.EntityFramework.EntityTypes.Migrations
 {
-    [Migration( "202001191257")]
+    [PluginMigration( "0.5.0" )]
     public class Initialize : EntityMigration
     {
         protected override void Up( MigrationBuilder migrationBuilder )

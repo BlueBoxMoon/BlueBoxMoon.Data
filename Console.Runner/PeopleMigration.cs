@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Console.Runner
 {
     [DbContext( typeof( DatabaseContext ) )]
-    [Migration( "1" )]
+    [PluginMigration( "1.0.0" )]
     public class PeopleMigration : EntityMigration
     {
         protected override void Up( MigrationBuilder migrationBuilder )
