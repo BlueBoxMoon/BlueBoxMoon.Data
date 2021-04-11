@@ -27,7 +27,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Pack
-      run: dotnet pack -c Release --no-build
+      run: dotnet pack -c Release
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
