@@ -71,6 +71,8 @@ namespace BlueBoxMoon.Data.EntityFramework
 
         private readonly EntityDbContextOptions _options = new EntityDbContextOptions();
 
+        private readonly IServiceProvider _serviceProvider;
+
         #endregion
 
         #region Constructors
@@ -79,9 +81,10 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// Creates a new instance of the <see cref="EntityDbContextOptionsBuilder"/> class.
         /// </summary>
         /// <param name="baseOptionsBuilder">The base options builder.</param>
-        public EntityDbContextOptionsBuilder( DbContextOptionsBuilder baseOptionsBuilder )
+        public EntityDbContextOptionsBuilder( DbContextOptionsBuilder baseOptionsBuilder, IServiceProvider serviceProvider )
         {
             BaseOptionsBuilder = baseOptionsBuilder;
+            _serviceProvider = serviceProvider;
         }
 
         #endregion
@@ -112,9 +115,9 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// <typeparam name="TPlugin">The plugin to be included.</typeparam>
         /// <returns>An <see cref="EntityDbContextOptionsBuilder"/> that can be used to further configure options.</returns>
         public EntityDbContextOptionsBuilder WithPlugin<TPlugin>()
-            where TPlugin : EntityPlugin, new()
+            where TPlugin : EntityPlugin
         {
-            ( ( List<EntityPlugin> ) Options.Plugins ).Add( new TPlugin() );
+            ( ( List<EntityPlugin> ) Options.Plugins ).Add( ActivatorUtilities.CreateInstance<TPlugin>( _serviceProvider ) );
 
             return this;
         }

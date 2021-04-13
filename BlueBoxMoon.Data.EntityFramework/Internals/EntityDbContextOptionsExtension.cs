@@ -65,7 +65,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// <summary>
         /// The application (parent) service collection.
         /// </summary>
-        internal IServiceCollection ApplicationServiceCollection { get; set; }
+        internal IServiceCollection ApplicationServiceCollection { get; }
 
         #endregion
 
@@ -75,9 +75,10 @@ namespace BlueBoxMoon.Data.EntityFramework.Internals
         /// Creates a new instance of the <see cref="EntityDbContextOptionsExtension"/> class.
         /// </summary>
         /// <param name="baseOptionsBuilder">The base options builder.</param>
-        public EntityDbContextOptionsExtension( DbContextOptionsBuilder baseOptionsBuilder )
+        public EntityDbContextOptionsExtension( DbContextOptionsBuilder baseOptionsBuilder, IServiceCollection applicationServiceCollection )
         {
-            Builder = new EntityDbContextOptionsBuilder( baseOptionsBuilder );
+            ApplicationServiceCollection = applicationServiceCollection;
+            Builder = new EntityDbContextOptionsBuilder( baseOptionsBuilder, applicationServiceCollection.BuildServiceProvider() );
         }
 
         #endregion

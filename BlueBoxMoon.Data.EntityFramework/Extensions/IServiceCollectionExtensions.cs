@@ -53,7 +53,7 @@ namespace BlueBoxMoon.Data.EntityFramework
             serviceCollection.AddDbContext<TContext>( optionsBuilder =>
             {
                 var extension = optionsBuilder.Options.FindExtension<EntityDbContextOptionsExtension>()
-                    ?? new EntityDbContextOptionsExtension( optionsBuilder ) { ApplicationServiceCollection = serviceCollection };
+                    ?? new EntityDbContextOptionsExtension( optionsBuilder, serviceCollection );
 
                 ( ( IDbContextOptionsBuilderInfrastructure ) optionsBuilder ).AddOrUpdateExtension( extension );
 

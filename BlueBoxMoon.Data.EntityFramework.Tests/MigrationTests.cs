@@ -125,7 +125,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
             var ctx = serviceProvider.GetService<TestContext>();
 
-            Assert.Throws<DependencyException>( ctx.Database.InstallPlugins );
+            var exception = Assert.Throws<DependencyException>( ctx.Database.InstallPlugins );
+
+            Assert.AreEqual( "PluginC", exception.Plugin );
+            Assert.AreEqual( new Version( "2.0" ), exception.Version );
+            Assert.AreEqual( 1, exception.Step );
         }
 
         /// <summary>
