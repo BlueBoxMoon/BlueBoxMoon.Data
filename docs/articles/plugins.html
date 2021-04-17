@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Plugins </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Plugins ">
+    <meta name="generator" content="docfx 2.57.2.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="plugins">Plugins</h1>
+
+<p>The core of the entire system is the ability to load plugins to provide all the useful features. Each plugin might depend on other plugins. This allows you to consume various plugins without having to know all the requirements of how to set up the plugin.</p>
+<p>When building your own functionality I recommend you build it as if it were a plugin, even if it is the functionality of your core application. While you can technically build all your migrations and dependency tracking yourself, treating your core logic as if it were a plugin allows you to take advantage of everything built-in to do that for you.</p>
+<h2 id="defining-a-plugin">Defining a Plugin</h2>
+<p>A plugin consists of a class that inherits from <code>EntityPlugin</code>. Your implementation then provides a few details that identify your plugin to the system as well as the user (if your application chooses to expose what plugins are installed).</p>
+<p>Your plugin will probably also consist of one or more migrations.</p>
+<h2 id="migrations">Migrations</h2>
+<p>A migration operates much like any other Entity Framework migration, though you need to inherit from <code>EntityMigration</code> and also adorn your implementation with the <code>PluginMigration</code> attribute. These provide a few additional features over their standard Entity Framework counterparts.</p>
+<p>For the most part, you make your changes to the database as you normally would. There are a few helpful extension methods you can use to make your life easier, such as <code>CreateEntityTable()</code>, or <code>AutoIncrement()</code>. These are meant to take some most time consuming parts and do them for you. Since this is meant to allow your migrations to be database agnostic, the <code>AutoIncrement()</code> extension for column operations will automatically tag the column with the correct database provider's information to make it an auto-incrementing column.</p>
+<p>The <code>PluginMigration</code> attribute takes two parameters. The first is a version string for what version of your plugin this migration was introduced in. For example, if you already have released version 1.0 of your plugin and you are now adding a new table that will be in version 2.0, you would pass <code>&quot;2.0&quot;</code> as the version string. Note: The version string can have 4 total integer segments. The second parameter is optional, but you should get in the habit of providing it. This is the migration step number. Suppose in version 2.0 you end up with 3 migrations before you finish putting everything in for the release. You would use steps <code>1</code>, <code>2</code>, and <code>3</code>. These steps define the order in which your migrations run for a specific version.</p>
+<p>Now, you might be wondering why you have to define all this version stuff instead of just a simple incrementing migration identifier. The answer is because there is another class attribute you can apply to your migration: <code>DependsOnPlugin</code>. This attribute allows you to setup proper dependency on another plugin. Your NuGet package would have the DLL dependency taking care of, but you need to make sure your migrations run after the migrations of the plugin you depend on. This attribute takes 3 parameters. The <code>Type</code> that identifies the plugin, and then the version number and (optionally) the step number. If the feature you need to ensure exists in the database before your migration run is in version 1.0.0 of the plugin, then you would specify <code>&quot;1.0.0&quot;</code> and leave the step blank. If you don't provide a step that effectively means &quot;make sure all steps for that version number have run&quot;.</p>
+<p>The step number comes in handy if you have two plugins that both depend on each other. They both might add features in version 2.0.0 but PluginA needs to run steps 1-3 before PluginB can run its first migration step. Then PluginA might need PluginB to run migration step 1 before it can run its own step 4. You can configure this interdependence easily.</p>
+<h2 id="consuming-a-plugin">Consuming a Plugin</h2>
+<p>Following the pattern set forth in Entity Framework Core already, consuming a plugin is very straight forward. For example:</p>
+<pre><code class="lang-cs">serviceCollection.AddEntityDbContext&lt;MyContext&gt;( options =&gt;
+{
+    options.UseSqlite();
+}, entityOptions =&gt;
+{
+    entityOptions.UseSqlite();
+    entityOptions.WithPlugin&lt;PluginA&gt;();
+} );
+</code></pre>
+<p>Okay, there is a little more to it than that. But that is all that is required to register your plugin - assuming your plugin doesn't actually do anything. In reality, you probably want to create an extension method for the <code>EntityDbContextOptionsBuilder</code> class. For example, the Facets plugin creates an extension method called <code>UseFacets()</code>. That method takes care of all initialization, such as ensuring that the Cache plugin has been requested, registering it's own settings into the service provider, calling the <code>WithPlugin()</code> and <code>WithEntity()</code> methods to register itself and its custom entity types.</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
