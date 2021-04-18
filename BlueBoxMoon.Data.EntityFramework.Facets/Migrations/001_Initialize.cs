@@ -30,6 +30,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BlueBoxMoon.Data.EntityFramework.Facets.Migrations
 {
     [PluginMigration( "0.5.0", 1 )]
+    [DependsOnPlugin( typeof( EntityTypesPlugin ), "0.5.0" )]
     public class Initialize : EntityMigration
     {
         protected override void Up( MigrationBuilder migrationBuilder )
