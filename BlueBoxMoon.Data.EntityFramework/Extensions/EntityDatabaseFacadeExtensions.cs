@@ -22,7 +22,9 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
+using BlueBoxMoon.Data.EntityFramework.Internals;
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -53,12 +55,26 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// Installs a plugin to the latest version possible.
         /// </summary>
         /// <param name="databaseFacade">The database facade.</param>
-        /// <param name="plugin">The plugin to be migrated.</param>
-        public static void InstallPlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        /// <param name="pluginType">The plugin to be migrated.</param>
+        public static void InstallPlugin( this DatabaseFacade databaseFacade, Type pluginType )
         {
+            var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
+            var context = ( EntityDbContext ) currentContext.Context;
+            var plugin = context.EntityContextOptions.Plugins.Single( a => a.GetType() == pluginType );
             var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
 
             migrator.Migrate( plugin );
+        }
+
+        /// <summary>
+        /// Installs a plugin to the latest version possible.
+        /// </summary>
+        /// <typeparam name="TPlugin">The type of the plugin to be installed.</typeparam>
+        /// <param name="databaseFacade">The database facade.</param>
+        public static void InstallPlugin<TPlugin>( this DatabaseFacade databaseFacade )
+            where TPlugin : EntityPlugin
+        {
+            InstallPlugin( databaseFacade, typeof( TPlugin ) );
         }
 
         /// <summary>
@@ -66,12 +82,26 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// its down migration steps until it is completely uninstalled.
         /// </summary>
         /// <param name="databaseFacade">The database facade.</param>
-        /// <param name="plugin">The plugin to be completely removed.</param>
-        public static void RemovePlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        /// <param name="pluginType">The plugin to be completely removed.</param>
+        public static void RemovePlugin( this DatabaseFacade databaseFacade, Type pluginType )
         {
+            var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
+            var context = ( EntityDbContext ) currentContext.Context;
+            var plugin = context.EntityContextOptions.Plugins.Single( a => a.GetType() == pluginType );
             var migrator = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<IPluginMigrator>();
 
-            migrator.Migrate( plugin, Microsoft.EntityFrameworkCore.Migrations.Migration.InitialDatabase );
+            migrator.Migrate( plugin, SemanticVersion.Empty );
+        }
+
+        /// <summary>
+        /// Remove a single plugin from the database by running all of
+        /// its down migration steps until it is completely uninstalled.
+        /// </summary>
+        /// <param name="databaseFacade">The database facade.</param>
+        public static void RemovePlugin<TPlugin>( this DatabaseFacade databaseFacade )
+            where TPlugin : EntityPlugin
+        {
+            RemovePlugin( databaseFacade, typeof( TPlugin ) );
         }
 
         /// <summary>
@@ -91,13 +121,25 @@ namespace BlueBoxMoon.Data.EntityFramework
         /// Initializes a plugin and gives it a chance to perform any database operations.
         /// </summary>
         /// <param name="databaseFacade">The database facade.</param>
-        /// <param name="plugin">The plugin to be initialized.</param>
-        public static void InitializePlugin( this DatabaseFacade databaseFacade, EntityPlugin plugin )
+        /// <param name="pluginType">The plugin to be initialized.</param>
+        public static void InitializePlugin( this DatabaseFacade databaseFacade, Type pluginType )
         {
             var currentContext = ( ( IInfrastructure<IServiceProvider> ) databaseFacade ).Instance.GetService<ICurrentDbContext>();
             var context = ( EntityDbContext ) currentContext.Context;
+            var plugin = context.EntityContextOptions.Plugins.Single( a => a.GetType() == pluginType );
 
             plugin.Initialize( context );
+        }
+
+        /// <summary>
+        /// Initializes a plugin and gives it a chance to perform any database operations.
+        /// </summary>
+        /// <typeparam name="TPlugin">The type of the plugin to be initialized.</typeparam>
+        /// <param name="databaseFacade">The database facade.</param>
+        public static void InitializePlugin<TPlugin>( this DatabaseFacade databaseFacade )
+            where TPlugin : EntityPlugin
+        {
+            InitializePlugin( databaseFacade, typeof( TPlugin ) );
         }
 
         /// <summary>

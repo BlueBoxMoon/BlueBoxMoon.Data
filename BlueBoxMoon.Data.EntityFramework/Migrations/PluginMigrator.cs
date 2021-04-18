@@ -219,7 +219,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// </summary>
         /// <param name="plugin">The plugin whose migrations should be run.</param>
         /// <param name="targetMigration">The target migration.</param>
-        public virtual void Migrate( EntityPlugin plugin, string targetMigration = null )
+        public virtual void Migrate( EntityPlugin plugin, SemanticVersion targetMigration = null )
         {
             Logger.LogInformation( LoggingEvents.MigratingId, LoggingEvents.Migrating, plugin.Identifier, Connection.DbConnection.Database, Connection.DbConnection.DataSource );
 
@@ -270,7 +270,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 //
                 PopulateMigrations(
                     plugin,
-                    appliedMigrationEntries.Select( t => t.MigrationId ).ToList(),
+                    appliedMigrationEntries.Select( t => SemanticVersion.Parse( t.MigrationId ) ).ToList(),
                     null,
                     out var migrationsToApply,
                     out var migrationsToRevert,
@@ -284,7 +284,6 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                         return new MigrationNode( plugin, migration, GenerateUpSql( plugin, migration ) );
                     } )
                     .OrderBy( a => a.Version )
-                    .ThenBy( a => a.Step )
                     .ToList();
 
                 //
@@ -312,12 +311,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                     .Select( b => new
                     {
                         Plugin = ( EntityPlugin ) Activator.CreateInstance( b.PluginType ),
-                        b.Version,
-                        b.Step
+                        b.Version
                     } )
                     .Where( b =>
                     {
-                        var step = b.Step;
+                        var step = int.Parse( b.Version.Prerelease );
 
                         if ( step == int.MaxValue )
                         {
@@ -346,35 +344,39 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                             // targetMigration contains the migration that needs to exist
                             // for this dependency to be met.
                             //
-                            step = targetMigration.Step;
+                            step = int.Parse( targetMigration.Version.Prerelease );
                         }
 
                         //
                         // If the applied migrations already contains this required migration step
                         // then we don't need to include it in our dependency check.
                         //
-                        return !appliedMigrations.Contains( $"{b.Plugin.Identifier}-{b.Version}-{step}" );
+                        return !appliedMigrations.Contains( $"{b.Plugin.Identifier}-{b.Version}" );
                     } )
                     .Select( b =>
                     {
-                        var step = b.Step;
+                        SemanticVersion version = b.Version;
+                        var step = int.Parse( b.Version.Prerelease );
 
                         if ( step == int.MaxValue )
                         {
                             step = b.Plugin.GetMigrations()
                                 .Select( c => c.GetCustomAttribute<PluginMigrationAttribute>() )
                                 .Where( c => c.Version <= b.Version )
-                                .FirstOrDefault()
-                                .Step;
+                                .OrderByDescending( c => c.Version )
+                                .Select( c => int.Parse( c.Version.Prerelease ) )
+                                .First();
+
+                            version = SemanticVersion.Parse( $"{version.Major}.{version.Minor}.{version.Patch}-{step}" );
                         }
 
-                        return migrationNodes.FirstOrDefault( pendingMigration => pendingMigration.Plugin.Identifier == b.Plugin.Identifier && pendingMigration.Version == b.Version && pendingMigration.Step == step );
-                    } )       
+                        return migrationNodes.FirstOrDefault( pendingMigration => pendingMigration.Plugin.Identifier == b.Plugin.Identifier && pendingMigration.Version == version );
+                    } )
                     .ToList();
 
                 if ( dependsOn.Any( a => a == null ) )
                 {
-                    throw new DependencyException( node.Plugin.Name, node.Version, node.Step, $"A required dependency was not found." );
+                    throw new DependencyException( node.Plugin.Name, node.Version, $"A required dependency was not found." );
                 }
 
                 node.Dependencies.AddRange( dependsOn );
@@ -401,7 +403,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <param name="appliedMigrationEntries">The applied migration entries.</param>
         /// <param name="targetMigration">The target migration.</param>
         /// <returns></returns>
-        protected virtual IEnumerable<Func<IReadOnlyList<MigrationCommand>>> GetMigrationCommandLists( EntityPlugin plugin, IReadOnlyList<HistoryRow> appliedMigrationEntries, string targetMigration = null )
+        protected virtual IEnumerable<Func<IReadOnlyList<MigrationCommand>>> GetMigrationCommandLists( EntityPlugin plugin, IReadOnlyList<HistoryRow> appliedMigrationEntries, SemanticVersion targetMigration = null )
         {
             //
             // Identify all the migration classes and whether they need to be
@@ -409,7 +411,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             //
             PopulateMigrations(
                 plugin,
-                appliedMigrationEntries.Select( t => t.MigrationId ),
+                appliedMigrationEntries.Select( t => SemanticVersion.Parse( t.MigrationId ) ),
                 targetMigration,
                 out var migrationsToApply,
                 out var migrationsToRevert,
@@ -469,14 +471,14 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <param name="actualTargetMigration">The actual target migration.</param>
         protected virtual void PopulateMigrations(
             EntityPlugin plugin,
-            IEnumerable<string> appliedMigrationEntries,
-            string targetMigration,
+            IEnumerable<SemanticVersion> appliedMigrationEntries,
+            SemanticVersion targetMigration,
             out IReadOnlyList<Migration> migrationsToApply,
             out IReadOnlyList<Migration> migrationsToRevert,
             out Migration actualTargetMigration )
         {
-            var appliedMigrations = new Dictionary<string, TypeInfo>();
-            var unappliedMigrations = new Dictionary<string, TypeInfo>();
+            var appliedMigrations = new Dictionary<SemanticVersion, TypeInfo>();
+            var unappliedMigrations = new Dictionary<SemanticVersion, TypeInfo>();
             var migrations = plugin.GetMigrations().ToList();
 
             if ( migrations.Count == 0 )
@@ -489,22 +491,22 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             //
             foreach ( var migration in migrations )
             {
-                var migrationId = migration.GetCustomAttribute<PluginMigrationAttribute>().MigrationId;
+                var migrationVersion = migration.GetCustomAttribute<PluginMigrationAttribute>().Version;
 
-                if ( appliedMigrationEntries.Contains( migrationId ) )
+                if ( appliedMigrationEntries.Contains( migrationVersion ) )
                 {
-                    appliedMigrations.Add( migrationId, migration.GetTypeInfo() );
+                    appliedMigrations.Add( migrationVersion, migration.GetTypeInfo() );
                 }
                 else
                 {
-                    unappliedMigrations.Add( migrationId, migration.GetTypeInfo() );
+                    unappliedMigrations.Add( migrationVersion, migration.GetTypeInfo() );
                 }
             }
 
             //
             // Build the list of migrations to apply or revert.
             //
-            if ( string.IsNullOrEmpty( targetMigration ) )
+            if ( targetMigration == null )
             {
                 //
                 // Migrate to latest version.
@@ -516,10 +518,10 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 migrationsToRevert = Array.Empty<Migration>();
                 actualTargetMigration = null;
             }
-            else if ( targetMigration == Migration.InitialDatabase )
+            else if ( targetMigration == SemanticVersion.Empty )
             {
                 //
-                // Migrate to uninstalled.
+                // Migrate down to uninstalled state.
                 //
                 migrationsToApply = Array.Empty<Migration>();
                 migrationsToRevert = appliedMigrations
@@ -534,19 +536,19 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 // Migrate to specific version.
                 //
                 migrationsToApply = unappliedMigrations
-                    .Where( m => string.Compare( m.Key, targetMigration, StringComparison.OrdinalIgnoreCase ) <= 0 )
+                    .Where( m => m.Key <= targetMigration )
                     .OrderBy( m => m.Key )
                     .Select( p => MigrationsAssembly.CreateMigration( p.Value, DatabaseProvider.Name ) )
                     .ToList();
 
                 migrationsToRevert = appliedMigrations
-                    .Where( m => string.Compare( m.Key, targetMigration, StringComparison.OrdinalIgnoreCase ) > 0 )
+                    .Where( m => m.Key > targetMigration )
                     .OrderByDescending( m => m.Key )
                     .Select( p => MigrationsAssembly.CreateMigration( p.Value, DatabaseProvider.Name ) )
                     .ToList();
 
                 actualTargetMigration = appliedMigrations
-                    .Where( m => string.Compare( m.Key, targetMigration, StringComparison.OrdinalIgnoreCase ) == 0 )
+                    .Where( m => m.Key == targetMigration )
                     .Select( p => MigrationsAssembly.CreateMigration( p.Value, DatabaseProvider.Name ) )
                     .SingleOrDefault();
             }
@@ -609,12 +611,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
             /// <summary>
             /// Gets the plugin version this migration is for.
             /// </summary>
-            public Version Version { get; }
-
-            /// <summary>
-            /// Gets the migration identifier inside the version of this node.
-            /// </summary>
-            public int Step { get; }
+            public SemanticVersion Version { get; }
 
             /// <summary>
             /// Gets the migration for this node.
@@ -647,7 +644,6 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
                 Migration = migration;
                 Commands = commands;
                 Version = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().Version;
-                Step = migration.GetType().GetCustomAttribute<PluginMigrationAttribute>().Step;
                 Dependencies = new List<MigrationNode>();
             }
 

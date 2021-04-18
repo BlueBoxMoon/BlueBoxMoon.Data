@@ -58,7 +58,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests.Core
         #region Tests
 
         [Test]
-        public void MigrationUpIsCalledWhenInstallingPlugin()
+        public void IsMigrationUpCalledWhenInstallingPlugin()
         {
             bool migrationUpCalled = true;
 
@@ -83,13 +83,44 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests.Core
 
             var ctx = serviceProvider.GetService<TestContext>();
 
-            ctx.Database.InstallPlugin( ctx.Database.GetPlugins().First() );
+            ctx.Database.InstallPlugin( typeof( TestPlugin ) );
 
             Assert.AreEqual( true, migrationUpCalled );
         }
 
         [Test]
-        public void MigrationDownIsCalledWhenRemovingPlugin()
+        public void IsMigrationUpCalledWhenInstallingPluginByGeneric()
+        {
+            bool migrationUpCalled = true;
+
+            var callbacks = new TestCallbacks
+            {
+                MigrationUp = () => migrationUpCalled = true
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<TestPlugin>();
+                    entityOptions.ApplyServices( sc => sc.AddSingleton( callbacks ) );
+                } )
+                .AddSingleton( callbacks );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            ctx.Database.InstallPlugin<TestPlugin>();
+
+            Assert.AreEqual( true, migrationUpCalled );
+        }
+
+        [Test]
+        public void IsMigrationDownCalledWhenRemovingPlugin()
         {
             bool migrationDownCalled = true;
 
@@ -114,10 +145,138 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests.Core
 
             var ctx = serviceProvider.GetService<TestContext>();
 
-            ctx.Database.InstallPlugin( ctx.Database.GetPlugins().First() );
-            ctx.Database.RemovePlugin( ctx.Database.GetPlugins().First() );
+            ctx.Database.InstallPlugin( typeof( TestPlugin ) );
+            ctx.Database.RemovePlugin( typeof( TestPlugin ) );
 
             Assert.AreEqual( true, migrationDownCalled );
+        }
+
+        [Test]
+        public void IsMigrationDownCalledWhenRemovingPluginByGeneric()
+        {
+            bool migrationDownCalled = true;
+
+            var callbacks = new TestCallbacks
+            {
+                MigrationDown = () => migrationDownCalled = true
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<TestPlugin>();
+                    entityOptions.ApplyServices( sc => sc.AddSingleton( callbacks ) );
+                } )
+                .AddSingleton( callbacks );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            ctx.Database.InstallPlugin<TestPlugin>();
+            ctx.Database.RemovePlugin<TestPlugin>();
+
+            Assert.AreEqual( true, migrationDownCalled );
+        }
+
+        [Test]
+        public void IsInitializeCalledWhenInitializingPlugin()
+        {
+            bool initializeCalled = true;
+
+            var callbacks = new TestCallbacks
+            {
+                PluginIntialized = () => initializeCalled = true
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<TestPlugin>();
+                    entityOptions.ApplyServices( sc => sc.AddSingleton( callbacks ) );
+                } )
+                .AddSingleton( callbacks );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            ctx.Database.InitializePlugin( typeof( TestPlugin ) );
+
+            Assert.AreEqual( true, initializeCalled );
+        }
+
+        [Test]
+        public void IsInitializeCalledWhenInitializingPluginByGeneric()
+        {
+            bool initializeCalled = true;
+
+            var callbacks = new TestCallbacks
+            {
+                PluginIntialized = () => initializeCalled = true
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<TestPlugin>();
+                    entityOptions.ApplyServices( sc => sc.AddSingleton( callbacks ) );
+                } )
+                .AddSingleton( callbacks );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            ctx.Database.InitializePlugin<TestPlugin>();
+
+            Assert.AreEqual( true, initializeCalled );
+        }
+
+        [Test]
+        public void IsInitializeCalledWhenInitializingPlugins()
+        {
+            bool initializeCalled = true;
+
+            var callbacks = new TestCallbacks
+            {
+                PluginIntialized = () => initializeCalled = true
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<TestPlugin>();
+                    entityOptions.ApplyServices( sc => sc.AddSingleton( callbacks ) );
+                } )
+                .AddSingleton( callbacks );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            //
+            // Really we need to test two plugins, but work with what we got for now.
+            //
+            ctx.Database.InitializePlugins();
+
+            Assert.AreEqual( true, initializeCalled );
         }
 
         #endregion

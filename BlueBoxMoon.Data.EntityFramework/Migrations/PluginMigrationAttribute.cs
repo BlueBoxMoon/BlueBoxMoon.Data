@@ -22,6 +22,8 @@
 //
 using System;
 
+using BlueBoxMoon.Data.EntityFramework.Internals;
+
 namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
     /// <summary>
@@ -37,18 +39,12 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// The version number in major.minor[.build[.revision]] format. This
         /// is the version number that this migration was introduced in.
         /// </summary>
-        public Version Version { get; }
-
-        /// <summary>
-        /// The ordered step to execute the migration inside the specified
-        /// <see cref="Version"/>.
-        /// </summary>
-        public int Step { get; }
+        public SemanticVersion Version { get; }
 
         /// <summary>
         /// The migration identifier to be written to the database.
         /// </summary>
-        internal string MigrationId => $"{Version}-{Step}";
+        internal string MigrationId => Version.ToString();
 
         #endregion
 
@@ -71,13 +67,12 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <param name="step">The ordered step to execute this migration in relation to the <paramref name="version"/>.</param>
         public PluginMigrationAttribute( string version, int step )
         {
-            Version = new Version( version );
-            Step = step;
-
-            if ( Version.Build == -1 || Version.Revision == -1 )
+            if ( version.Contains( "-" ) )
             {
-                Version = new Version( Version.Major, Version.Minor, Version.Build >= 0 ? Version.Build : 0, Version.Revision >= 0 ? Version.Revision : 0 );
+                throw new ArgumentException( "Version must be in format \"<major>[.<minor>[.<patch>]]\".", nameof( version ) );
             }
+
+            Version = SemanticVersion.Parse( version + $"-{step}" );
         }
 
         #endregion

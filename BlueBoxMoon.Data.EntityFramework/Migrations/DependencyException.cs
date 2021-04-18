@@ -22,6 +22,8 @@
 //
 using System;
 
+using BlueBoxMoon.Data.EntityFramework.Internals;
+
 namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
     /// <summary>
@@ -39,13 +41,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <summary>
         /// The version number of the migration that had a dependency exception.
         /// </summary>
-        public Version Version { get; }
-
-        /// <summary>
-        /// The specific migration step in the <see cref="Version"/> that had
-        /// a dependency exception.
-        /// </summary>
-        public int Step { get; }
+        public SemanticVersion Version { get; }
 
         #endregion
 
@@ -58,12 +54,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// <param name="version">The version number of the migration.</param>
         /// <param name="step">The specific migration step of the migration.</param>
         /// <param name="message">The message that describes what happened.</param>
-        public DependencyException( string plugin, Version version, int step, string message )
+        public DependencyException( string plugin, SemanticVersion version, string message )
             : base( message )
         {
             Plugin = plugin;
             Version = version;
-            Step = step;
         }
 
         #endregion

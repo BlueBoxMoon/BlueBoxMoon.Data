@@ -22,6 +22,8 @@
 //
 using System.Collections.Generic;
 
+using BlueBoxMoon.Data.EntityFramework.Internals;
+
 namespace BlueBoxMoon.Data.EntityFramework.Migrations
 {
     /// <summary>
@@ -35,7 +37,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Migrations
         /// </summary>
         /// <param name="plugin">The plugin whose migrations should be run.</param>
         /// <param name="targetMigration">The target migration.</param>
-        void Migrate( EntityPlugin plugin, string targetMigration = null );
+        void Migrate( EntityPlugin plugin, SemanticVersion targetMigration = null );
 
         /// <summary>
         /// Initiates a migration operation of the plugins to the latest versions.

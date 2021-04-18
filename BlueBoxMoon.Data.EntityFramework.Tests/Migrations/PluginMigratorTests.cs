@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+using BlueBoxMoon.Data.EntityFramework.Internals;
 using BlueBoxMoon.Data.EntityFramework.Migrations;
 using BlueBoxMoon.Data.EntityFramework.Sqlite;
 
@@ -36,9 +37,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NUnit.Framework;
 
-namespace BlueBoxMoon.Data.EntityFramework.Tests
+namespace BlueBoxMoon.Data.EntityFramework.Tests.Migrations
 {
-    public class MigrationTests
+    public class PluginMigratorTests
     {
         #region Setup/TearDown
 
@@ -66,15 +67,15 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         /// when a migration depends on another plugin.
         /// </summary>
         [Test]
-        public void DependencyOrderIsValid()
+        public void IsDependencyOrderValid()
         {
             var expectedMigrations = new List<string>
             {
-                "PluginC-1.0.0.0-1",
-                "PluginC-2.0.0.0-1",
-                "PluginB-1.0.0.0-1",
-                "PluginA-1.0.0.0-1",
-                "PluginA-1.0.0.0-2"
+                "PluginC-1.0.0-1",
+                "PluginC-2.0.0-1",
+                "PluginB-1.0.0-1",
+                "PluginA-1.0.0-1",
+                "PluginA-1.0.0-2"
             };
 
             var serviceCollection = new ServiceCollection()
@@ -108,7 +109,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         /// thrown when an unmet dependency exists.
         /// </summary>
         [Test]
-        public void UnmetDependencyThrowsError()
+        public void DoesUnmetDependencyThrowException()
         {
             var serviceCollection = new ServiceCollection()
                 .AddEntityDbContext<TestContext>( options =>
@@ -118,7 +119,6 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
                 {
                     entityOptions.UseSqlite();
                     entityOptions.WithPlugin<PluginA>();
-                    entityOptions.WithPlugin<PluginB>();
                 } );
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -127,9 +127,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
             var exception = Assert.Throws<DependencyException>( ctx.Database.InstallPlugins );
 
-            Assert.AreEqual( "PluginC", exception.Plugin );
-            Assert.AreEqual( new Version( "2.0" ), exception.Version );
-            Assert.AreEqual( 1, exception.Step );
+            Assert.AreEqual( "PluginA", exception.Plugin );
+            Assert.AreEqual( SemanticVersion.Parse( "1.0.0-1" ), exception.Version );
         }
 
         /// <summary>
@@ -140,9 +139,9 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         {
             var expectedMigrations = new List<string>
             {
-                "PluginC-1.0.0.0-1",
-                "PluginC-2.0.0.0-1",
-                "PluginB-1.0.0.0-1"
+                "PluginC-1.0.0-1",
+                "PluginC-2.0.0-1",
+                "PluginB-1.0.0-1"
             };
 
             var serviceCollection = new ServiceCollection()
@@ -164,7 +163,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
             ctx.Database.InstallPlugins();
 
             var pluginToRemove = ctx.Database.GetPlugins().Single( a => a.Name == "PluginA" );
-            ctx.Database.RemovePlugin( pluginToRemove );
+            ctx.Database.RemovePlugin<PluginA>();
 
             var repo = ctx.GetService<IPluginHistoryRepository>();
             var migrations = repo.GetAppliedMigrations()
@@ -182,8 +181,8 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         {
             var expectedMigrations = new List<string>
             {
-                "PluginC-1.0.0.0-1",
-                "PluginC-2.0.0.0-1"
+                "PluginC-1.0.0-1",
+                "PluginC-2.0.0-1"
             };
 
             var serviceCollection = new ServiceCollection()
@@ -201,7 +200,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
             var ctx = serviceProvider.GetService<TestContext>();
 
             var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
-            ctx.Database.InstallPlugin( pluginToInstall );
+            ctx.Database.InstallPlugin<PluginC>();
 
             var repo = ctx.GetService<IPluginHistoryRepository>();
             var migrations = repo.GetAppliedMigrations()
@@ -219,7 +218,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         {
             var expectedMigrations = new List<string>
             {
-                "PluginC-1.0.0.0-1"
+                "PluginC-1.0.0-1"
             };
 
             var serviceCollection = new ServiceCollection()
@@ -239,7 +238,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
             var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
             var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
 
-            migrator.Migrate( pluginToInstall, "1.0.0.0-1" );
+            migrator.Migrate( pluginToInstall, SemanticVersion.Parse( "1.0.0-1" ) );
 
             var repo = ctx.GetService<IPluginHistoryRepository>();
             var migrations = repo.GetAppliedMigrations()
@@ -257,7 +256,7 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
         {
             var expectedMigrations = new List<string>
             {
-                "PluginC-1.0.0.0-1"
+                "PluginC-1.0.0-1"
             };
 
             var serviceCollection = new ServiceCollection()
@@ -276,11 +275,11 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
             var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
 
-            ctx.Database.InstallPlugin( pluginToInstall );
+            ctx.Database.InstallPlugin<PluginC>();
 
             var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
 
-            migrator.Migrate( pluginToInstall, "1.0.0.0-1" );
+            migrator.Migrate( pluginToInstall, SemanticVersion.Parse( "1.0.0-1" ) );
 
             var repo = ctx.GetService<IPluginHistoryRepository>();
             var migrations = repo.GetAppliedMigrations()
@@ -288,6 +287,187 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
                 .ToList();
 
             Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        /// <summary>
+        /// Verifies that we can upgrade an existing single plugin to
+        /// a new version.
+        /// </summary>
+        [Test]
+        public void CanUpgradeSinglePluginToSpecificVersion()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0-1",
+                "PluginC-2.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( pluginToInstall, SemanticVersion.Parse( "1.0.0-1" ) );
+            migrator.Migrate( pluginToInstall, SemanticVersion.Parse( "2.0.0-1" ) );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        /// <summary>
+        /// Verifies that we can upgrade an existing single plugin to
+        /// a new version.
+        /// </summary>
+        [Test]
+        public void IsMigrationRequestIgnoredWhenPluginAlreadyInstalled()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0-1",
+                "PluginC-2.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( ctx.Database.GetPlugins() );
+            migrator.Migrate( pluginToInstall );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        [Test]
+        public void CanInstallSinglePluginThenUpgradePluginsToLatest()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginC-1.0.0-1",
+                "PluginC-2.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginC>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var pluginToInstall = ctx.Database.GetPlugins().Single( a => a.Name == "PluginC" );
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( pluginToInstall, SemanticVersion.Parse( "1.0.0-1" ) );
+            migrator.Migrate( ctx.Database.GetPlugins() );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        [Test]
+        public void CanInstallPluginWithDependencyOnPluginWithoutMigrations()
+        {
+            var expectedMigrations = new List<string>
+            {
+                "PluginE-1.0.0-1"
+            };
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginE>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( ctx.Database.GetPlugins() );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+            var migrations = repo.GetAppliedMigrations()
+                .Select( a => $"{a.Plugin}-{a.MigrationId}" )
+                .ToList();
+
+            Assert.AreEqual( expectedMigrations, migrations );
+        }
+
+        [Test]
+        public void CanInstallPluginWithoutMigrations()
+        {
+            var expectedMigrations = new List<string>();
+
+            var serviceCollection = new ServiceCollection()
+                .AddEntityDbContext<TestContext>( options =>
+                {
+                    options.UseSqlite( _connection );
+                }, entityOptions =>
+                {
+                    entityOptions.UseSqlite();
+                    entityOptions.WithPlugin<PluginD>();
+                } );
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ctx = serviceProvider.GetService<TestContext>();
+
+            var migrator = ( ( IInfrastructure<IServiceProvider> ) ctx.Database ).Instance.GetService<IPluginMigrator>();
+
+            migrator.Migrate( ctx.Database.GetPlugins() );
+
+            var repo = ctx.GetService<IPluginHistoryRepository>();
+
+            Assert.IsEmpty( repo.GetAppliedMigrations() );
         }
 
         #endregion
@@ -389,6 +569,43 @@ namespace BlueBoxMoon.Data.EntityFramework.Tests
 
             [PluginMigration( "2.0.0" )]
             public class Migration2 : EntityMigration
+            {
+                protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
+                {
+                }
+
+                protected override void Down( MigrationBuilder migrationBuilder )
+                {
+                }
+            }
+        }
+
+        private class PluginD : EntityPlugin
+        {
+            public override string Identifier => "PluginD";
+
+            public override string Name => "PluginD";
+
+            public override IEnumerable<Type> GetMigrations()
+            {
+                return new Type[0];
+            }
+        }
+
+        private class PluginE : EntityPlugin
+        {
+            public override string Identifier => "PluginE";
+
+            public override string Name => "PluginE";
+
+            public override IEnumerable<Type> GetMigrations()
+            {
+                return new Type[] { typeof( Migration1 ) };
+            }
+
+            [PluginMigration( "1.0.0" )]
+            [DependsOnPlugin( typeof( PluginD ), "1.0.0" )]
+            public class Migration1 : EntityMigration
             {
                 protected override void Up( [NotNull] MigrationBuilder migrationBuilder )
                 {
